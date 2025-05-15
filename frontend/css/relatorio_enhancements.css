@@ -1,0 +1,223 @@
+/****** Relatorio Enhancements CSS (relatorio_enhancements.css) ******/
+
+/*
+Este ficheiro contém estilos adicionais e melhorias para a página de relatório,
+com foco num novo componente de dropdown multi-select para técnicos e melhorias gerais de UI/UX.
+*/
+
+/* === Estilo Base para o Dropdown Multi-Select de Técnicos === */
+.multiselect-dropdown {
+    position: relative;
+    display: inline-block;
+    width: 100%; /* Ocupa a largura do container pai */
+    min-width: 200px; /* Largura mínima para melhor usabilidade */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    border: 1px solid var(--medium-gray, #ccc);
+    border-radius: 4px;
+    background-color: var(--white, #fff);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.multiselect-dropdown:hover {
+    border-color: var(--dark-gray, #888);
+}
+
+.multiselect-dropdown.open {
+    border-color: var(--primary-color, #e63232);
+    box-shadow: 0 0 0 2px rgba(230, 50, 50, 0.2);
+    z-index: 1001; /* Para ficar acima de outros elementos quando aberto */
+}
+
+.multiselect-dropdown-button {
+    background-color: transparent;
+    color: var(--secondary-color, #333);
+    padding: 0.6rem 0.75rem; /* Ajuste de padding para melhor aparência */
+    border: none; /* A borda está no container principal */
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    font-size: 0.9rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: background-color 0.1s ease;
+}
+
+.multiselect-dropdown-button:focus {
+    outline: none;
+}
+
+.multiselect-dropdown-button .placeholder {
+    color: var(--dark-gray, #666);
+    font-style: italic;
+}
+
+.multiselect-dropdown-arrow {
+    font-size: 0.7rem;
+    margin-left: 8px;
+    transition: transform 0.3s ease;
+    color: var(--dark-gray, #666);
+}
+
+.multiselect-dropdown.open .multiselect-dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.multiselect-dropdown-list-wrapper {
+    display: none;
+    position: absolute;
+    top: calc(100% + 2px); /* Ligeiramente abaixo do botão */
+    left: 0;
+    right: 0;
+    background-color: var(--white, #fff);
+    border: 1px solid var(--medium-gray, #ccc);
+    border-top: none; /* Evita borda dupla com o container */
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    max-height: 180px; /* Altura máxima para a lista */
+    overflow-y: auto;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.multiselect-dropdown.open .multiselect-dropdown-list-wrapper {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.multiselect-dropdown-list {
+    list-style: none;
+    padding: 0.25rem 0;
+    margin: 0;
+}
+
+.multiselect-dropdown-list-item {
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    font-size: 0.9rem;
+    color: var(--secondary-color, #333);
+}
+
+.multiselect-dropdown-list-item:hover {
+    background-color: var(--light-gray, #f4f4f4);
+}
+
+.multiselect-dropdown-list-item input[type="checkbox"] {
+    margin-right: 0.6rem;
+    width: auto; /* Para não ocupar 100% */
+    height: 1em;
+    accent-color: var(--primary-color, #e63232);
+    cursor: pointer;
+}
+
+.multiselect-dropdown-list-item label {
+    margin-bottom: 0; /* Reset de label */
+    font-weight: normal;
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+
+.multiselect-dropdown-list-item.selected {
+    background-color: rgba(230, 50, 50, 0.1); /* Cor primária com opacidade */
+}
+
+/* === Melhorias Visuais Gerais para a Tela de Relatório === */
+
+/* Ajuste no espaçamento e bordas dos itens de serviço para um visual mais limpo */
+.service-item {
+    /* A classe .service-item já existe em styles.css e additional.css, 
+       estas são sugestões de refinamento ou podem ser integradas. 
+       Se additional.css já tem um bom layout para service-item, pode não ser necessário redefinir tudo aqui.
+       O exemplo abaixo assume que queremos um card mais destacado. */
+    background-color: var(--white, #fff);
+    border: 1px solid var(--medium-gray, #ddd);
+    border-radius: 6px;
+    padding: 1rem 1.25rem; /* Mais padding interno */
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+    transition: box-shadow 0.2s ease;
+}
+
+.service-item:hover {
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+.service-item .service-description {
+    font-size: 1rem; /* Tamanho de fonte ligeiramente maior para a descrição */
+    font-weight: 600; /* Mais destaque para a descrição */
+    color: var(--secondary-color, #333);
+    margin-bottom: 0.75rem;
+}
+
+/* Organização dos campos dentro de cada service-item */
+.service-item .form-group {
+    margin-bottom: 0.75rem; /* Espaçamento menor entre os grupos dentro do item */
+}
+
+.service-item .form-group label {
+    font-size: 0.85rem; /* Labels menores */
+    font-weight: 500;
+    color: var(--dark-gray, #666);
+}
+
+/* Botão Salvar Serviço Individual com animação */
+.btn-salvar-servico-individual {
+    /* Estilos base já definidos, adicionar transição para feedback */
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-salvar-servico-individual:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+.btn-salvar-servico-individual:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+/* Animação para o container de serviços ao aparecer */
+#servicosContainer {
+    /* display: none; é controlado por JS */
+    animation: fadeInSmooth 0.5s ease-out forwards;
+}
+
+@keyframes fadeInSmooth {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsividade para o dropdown e itens de serviço */
+@media (max-width: 768px) {
+    .multiselect-dropdown {
+        min-width: 100%; /* Ocupar toda a largura disponível */
+    }
+
+    .service-item {
+        padding: 0.75rem;
+    }
+
+    .service-item .service-description {
+        font-size: 0.95rem;
+    }
+}
+
+/* Adicionar ao final de additional.css ou como um novo ficheiro CSS <link> em relatorio.html */
+

@@ -1,0 +1,834 @@
+/* additional.css */
+/* Estilos adicionais para o sistema */
+
+/* Estilos gerais herdados (simplificado) */
+:root {
+  --primary-color: #e63232;
+  --secondary-color: #333;
+  --light-gray: #eee;
+  --medium-gray: #ccc;
+  --dark-gray: #888;
+  --white: #fff;
+  --success: #4CAF50;
+  --warning: #ff9800;
+  --danger: #dc3545;
+  --info: #17a2b8;
+}
+
+body {
+  font-family: sans-serif;
+  background-color: #f4f4f4;
+  color: var(--secondary-color);
+}
+
+button {
+  cursor: pointer;
+  padding: 8px 15px;
+  border-radius: 4px;
+  border: 1px solid var(--medium-gray);
+  background-color: var(--light-gray);
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: var(--medium-gray);
+}
+
+/* --- Estilos Otimizados para Lista de Serviços (Compacto e Profissional) --- */
+
+.service-checklist {
+  margin-bottom: 20px;
+}
+
+.service-item {
+  display: grid;
+  grid-template-columns: 1fr auto auto; /* Descrição | Técnicos | Status */
+  grid-template-areas:
+    "description technicians status";
+  gap: 10px 15px; /* Espaçamento entre linhas e colunas */
+  align-items: center; /* Alinha verticalmente ao centro */
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  border: 1px solid var(--light-gray);
+  border-radius: 6px;
+  background-color: var(--white);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  min-height: 60px; /* Altura mínima para consistência */
+}
+
+.service-item p {
+  grid-area: description;
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  /* Evita que a descrição empurre outros elementos */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* Permite quebrar palavras longas */
+  word-break: break-word;
+}
+
+/* --- Dropdown de Técnicos (Compacto) --- */
+.tecnicos-selection {
+  grid-area: technicians;
+  position: relative; /* Necessário para o posicionamento do dropdown */
+  min-width: 180px; /* Largura mínima para o botão */
+}
+
+.dropdown-button {
+  background-color: var(--white);
+  color: var(--secondary-color);
+  padding: 6px 12px; /* Padding reduzido */
+  border: 1px solid var(--medium-gray);
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-size: 0.9rem; /* Fonte ligeiramente menor */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  white-space: nowrap; /* Evita quebra de linha no botão */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdown-button:hover {
+  border-color: var(--dark-gray);
+}
+
+.dropdown-button:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(230, 50, 50, 0.2);
+}
+
+.dropdown-button::after {
+  content: '\25BC';
+  font-size: 0.6rem;
+  margin-left: 8px;
+  transition: transform 0.3s ease;
+}
+
+.tecnicos-selection.open .dropdown-button::after {
+  transform: rotate(180deg);
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: var(--white);
+  min-width: 100%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--medium-gray);
+  border-radius: 4px;
+  z-index: 10;
+  max-height: 150px; /* Altura máxima reduzida */
+  overflow-y: auto;
+  margin-top: 2px;
+  opacity: 0;
+  transform: translateY(-5px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.dropdown-content.show {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.dropdown-item {
+  padding: 8px 12px; /* Padding reduzido */
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.dropdown-item:hover {
+  background-color: #f5f5f5;
+}
+
+.dropdown-item input[type="checkbox"] {
+  margin-right: 8px;
+  width: auto;
+  accent-color: var(--primary-color);
+  transform: scale(0.9); /* Checkbox ligeiramente menor */
+}
+
+.dropdown-item label {
+  margin-bottom: 0;
+  font-weight: normal;
+  color: var(--secondary-color);
+  flex-grow: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Não mostra mais o texto "Nenhum técnico selecionado" abaixo */
+.selected-tecnicos {
+ display: none;
+}
+
+/* --- Status (Resolvido/Pendente) Compacto --- */
+.status-selection {
+  grid-area: status;
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Espaço entre os botões de rádio */
+}
+
+.status-selection .radio-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 4px 6px; /* Padding reduzido */
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.status-selection .radio-label:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.status-selection .radio-label input[type="radio"] {
+  margin-right: 5px;
+  width: auto;
+  accent-color: var(--primary-color);
+  transform: scale(0.9);
+}
+
+.status-selection .radio-label input[type="radio"]:checked + span {
+  font-weight: 500;
+}
+
+.status-selection .radio-label input[value="resolvido"]:checked + span {
+ color: var(--success);
+}
+
+.status-selection .radio-label input[value="pendente"]:checked + span {
+ color: var(--warning);
+}
+
+/* --- Responsividade --- */
+@media (max-width: 768px) {
+  .service-item {
+    grid-template-columns: 1fr; /* Coluna única */
+    grid-template-areas:
+      "description"
+      "technicians"
+      "status";
+    gap: 8px; /* Espaçamento reduzido */
+    padding: 10px;
+    min-height: auto;
+  }
+
+  .tecnicos-selection {
+    min-width: unset;
+    width: 100%;
+  }
+
+  .status-selection {
+    justify-content: flex-start; /* Alinha à esquerda */
+    padding-top: 5px;
+  }
+}
+
+/* Estilos para o formulário */
+.form-container {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.info-item {
+  margin-bottom: 10px;
+}
+
+.info-item label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+.info-item p {
+  margin: 0;
+  padding: 8px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  border: 1px solid #eee;
+}
+
+.button-container {
+  margin: 20px 0;
+  text-align: center;
+}
+
+/* Estilos para o pad de assinatura */
+.signature-container {
+  margin: 20px 0;
+}
+
+.signature-pad {
+  width: 100%;
+  height: 200px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.signature-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+/* Estilos para o modal - MELHORADO */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* Fundo mais escuro para melhor contraste */
+  display: none; /* Escondido por padrão - será alterado para flex via JS */
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.modal.show {
+  opacity: 1;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+  max-width: 500px;
+  width: 90%;
+  transform: translateY(-20px);
+  transition: transform 0.3s ease-in-out;
+  text-align: center;
+}
+
+.modal.show .modal-content {
+  transform: translateY(0);
+}
+
+.modal h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: var(--secondary-color);
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.modal p {
+  margin-bottom: 20px;
+  color: var(--dark-gray);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* Botões do modal melhorados */
+.btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 25px;
+}
+
+.btn-success {
+  background-color: var(--success);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.btn-success:hover {
+  background-color: #3d8b40;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-warning {
+  background-color: var(--warning);
+  color: #333;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.btn-warning:hover {
+  background-color: #e59400;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-secondary {
+  background-color: #f0f0f0;
+  color: #555;
+  border: 1px solid #ddd;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background-color: #e0e0e0;
+  transform: translateY(-2px);
+}
+
+/* Responsividade para o modal */
+@media (max-width: 576px) {
+  .modal-content {
+    width: 95%;
+    padding: 20px;
+  }
+  
+  .btn-group {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .btn-group button {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+}
+
+/* Estilos para mensagens */
+.mensagem-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 1001;
+  max-width: 90%;
+  width: auto;
+  min-width: 280px;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  border: 1px solid;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Estilos para status */
+.status-badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.85em;
+  font-weight: bold;
+}
+
+.status-nao-iniciada {
+  background-color: #e0e0e0;
+  color: #616161;
+}
+
+.status-andamento {
+  background-color: #fff9c4;
+  color: #f57f17;
+}
+
+.status-concluido {
+  background-color: #c8e6c9;
+  color: #2e7d32;
+}
+
+.status-pendente {
+  background-color: #ffcdd2;
+  color: #c62828;
+}
+
+/* Estilos para a lista de arquivos */
+.file-list {
+  margin: 10px 0;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.file-list ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.file-list li {
+  margin-bottom: 5px;
+}
+
+/* Estilos para a barra de progresso */
+.progress-bar {
+  width: 100%;
+  height: 20px;
+  background-color: #f5f5f5;
+  border-radius: 10px;
+  margin: 10px 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: #4caf50;
+  border-radius: 10px;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+.progress-bar-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  line-height: 20px;
+  color: #000;
+  font-size: 12px;
+  font-weight: bold;
+  text-shadow: 0 0 2px #fff;
+}
+
+
+/* Estilos para a nova seção Arquivos do Serviço */
+#arquivosServicoContainer h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Espaço entre o ícone e o texto */
+    margin-bottom: 15px;
+}
+
+.arquivos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* Cria colunas responsivas */
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.arquivo-item {
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    aspect-ratio: 1 / 1; /* Mantém os itens quadrados */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f0f0f0;
+}
+
+.arquivo-item img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Garante que a imagem cubra o espaço sem distorcer */
+    transition: transform 0.3s ease;
+}
+
+.arquivo-item:hover img {
+    transform: scale(1.05);
+}
+
+.arquivo-item .play-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2rem;
+    color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    padding: 10px;
+    pointer-events: none; /* Para não interferir no clique do item */
+}
+
+/* Estilos para o novo Modal de Arquivo */
+.modal-arquivo .modal-content {
+    max-width: 90vw; /* Largura máxima maior para imagens/vídeos */
+    max-height: 90vh;
+    padding: 10px; /* Menos padding interno */
+    background-color: #333; /* Fundo escuro para melhor visualização */
+    overflow: hidden; /* Evita barras de rolagem no conteúdo do modal */
+}
+
+#arquivoModalContent {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: calc(90vh - 40px); /* Ajusta altura considerando padding e botão fechar */
+}
+
+#arquivoModalContent img,
+#arquivoModalContent video {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; /* Garante que a mídia caiba sem cortar */
+    border-radius: 4px;
+}
+
+/* Ajuste no botão fechar para fundo escuro */
+.modal-arquivo .close-btn {
+    color: #fff;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    top: 15px;
+    right: 15px;
+}
+
+.modal-arquivo .close-btn:hover {
+    background-color: rgba(255, 0, 0, 0.7);
+}
+
+/* Mensagens de carregamento/sem arquivos */
+#loadingArquivosMsg,
+#noArquivosMsg {
+    grid-column: 1 / -1; /* Ocupa toda a largura da grid */
+    text-align: center;
+    color: #666;
+    padding: 20px;
+}
+
+
+
+
+/* Estilos para o campo de observação do serviço */
+.obs-servico-group {
+    margin-top: 10px;
+    width: 100%;
+}
+
+.obs-servico-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+.obs-servico-textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9em;
+    resize: vertical; /* Permite redimensionamento vertical */
+    min-height: 40px;
+}
+
+
+
+/* Estilos para a Área de Notificações */
+.notification-area {
+    position: fixed; /* Ou 'absolute' dependendo do layout desejado */
+    top: 70px; /* Ajuste conforme necessário, abaixo do header */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600px; /* Largura máxima para as notificações */
+    z-index: 1050; /* Garante que fique acima de outros elementos */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px; /* Espaço entre notificações */
+}
+
+/* Estilos Base para Notificações */
+.notification {
+    width: 100%;
+    padding: 12px 20px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    color: var(--white);
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-align: center;
+    opacity: 0.95;
+    transition: opacity 0.3s ease;
+}
+
+/* Variações de Cor */
+.notification.success {
+    background-color: var(--success); /* Verde */
+}
+
+.notification.error {
+    background-color: var(--danger); /* Vermelho */
+}
+
+.notification.warning, .notification.aviso {
+    background-color: var(--warning); /* Laranja */
+    color: #333; /* Texto escuro para melhor contraste com laranja */
+}
+
+.notification.info {
+    background-color: var(--info); /* Azul */
+}
+
+
+
+/* Estilos para o Multi-Select Minimalista */
+.multi-select-container {
+    position: relative;
+    display: inline-block;
+    min-width: 150px; /* Ajuste conforme necessário */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    cursor: pointer;
+    font-size: 14px; /* Tamanho de fonte padrão */
+}
+
+.multi-select-selected-text {
+    padding: 8px 12px;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.multi-select-options {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    max-height: 150px;
+    overflow-y: auto;
+    z-index: 1000;
+    left: 0;
+    right: 0;
+    margin-top: -1px; /* Sobrepor a borda inferior do container */
+}
+
+.multi-select-container.open .multi-select-options {
+    display: block;
+}
+
+.multi-select-option {
+    padding: 8px 12px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.multi-select-option:hover {
+    background-color: #f0f0f0;
+}
+
+.multi-select-option.selected {
+    background-color: #e0e0e0; /* Cor de fundo para selecionado */
+    font-weight: bold;
+}
+
+/* Ocultar a opção "Todos" quando outras estiverem selecionadas */
+.multi-select-option[data-value=""].hide-todos {
+    display: none;
+}
+
+/* Ajuste para o grupo de filtro */
+.filter-group .multi-select-container {
+    vertical-align: middle; /* Alinhar com label e outros inputs */
+}
+
+
+
+/* Estilos para a funcionalidade Salvar Serviço Individual */
+.service-item-container {
+    border: 1px solid #e0e0e0;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.service-item-container .service-description {
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+.service-item-container .form-group {
+    margin-bottom: 10px;
+}
+
+.salvar-servico {
+    margin-top: 10px;
+    padding: 8px 15px;
+    font-size: 0.95em;
+}
+
+.salvar-servico:disabled {
+    background-color: #6c757d; /* Cinza para desabilitado */
+    border-color: #6c757d;
+    cursor: not-allowed;
+}
+
+.mensagem-validacao-servico {
+    color: var(--danger, #dc3545);
+    font-size: 0.85em;
+    margin-top: 8px;
+    font-weight: bold;
+}
+
+.servico-salvo-feedback {
+    color: var(--success, #28a745);
+    font-size: 0.85em;
+    margin-top: 8px;
+    font-weight: bold;
+}
+
+/* Ajustes para os checkboxes e radios dentro do service-item-container para melhor espaçamento */
+.service-item-container .tecnicos-selection .form-check,
+.service-item-container .status-selection .form-check {
+    margin-right: 10px; /* Adiciona um pouco mais de espaço à direita */
+    margin-bottom: 5px; /* Adiciona espaço abaixo para evitar quebra de linha apertada */
+}
+
+.service-item-container .tecnicos-selection label,
+.service-item-container .status-selection label {
+    margin-bottom: 5px; /* Espaço abaixo do label do grupo */
+}
+

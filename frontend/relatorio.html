@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de OS - Perfecta</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/additional.css">
+    <link rel="stylesheet" href="css/relatorio_enhancements.css">
+    <link rel="stylesheet" href="css/relatorio_novo_layout.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="img/logo.png" alt="Perfecta Logo" class="logo">
+            <h1>Relatório de Ordem de Serviço</h1>
+        </div>
+    </header>
+
+    <main>
+        <section class="form-container">
+            <div id="dadosOS">
+                <h2>O.S. <span id="numeroOS"></span></h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>Cliente:</label>
+                        <p id="clienteOS"></p>
+                    </div>
+                    <div class="info-item">
+                        <label>Endereço:</label>
+                        <p id="enderecoOS"></p>
+                    </div>
+                    <div class="info-item">
+                        <label>Cidade:</label>
+                        <p id="cidadeOS"></p>
+                    </div>
+                    <div class="info-item">
+                        <label>Técnicos Responsáveis:</label>
+                        <p id="tecnicosOS"></p>
+                    </div>
+                    <div class="info-item">
+                        <label>Status:</label>
+                        <p id="statusOS"></p>
+                    </div>
+                    <div class="info-item">
+                        <label>Agendamento Inicial:</label>
+                        <p id="agendamentoInicialOS"></p>
+                    </div>
+                    <div class="info-item">
+                        <label>Agendamento Final:</label>
+                        <p id="agendamentoFinalOS"></p>
+                    </div>
+                    <div class="info-item">
+                        <label>Data da Solicitação:</label>
+                        <p id="dataSolicitacaoOS"></p>
+                    </div>
+                    <div class="info-item">
+                        <label>Responsável Solicitação:</label>
+                        <p id="responsavelOS"></p>
+                    </div>
+                </div>
+
+                <!-- Observações (Mantido aqui, antes de iniciar serviço) -->
+                <div id="observacoesContainer" class="form-group">
+                    <h3><i class="fas fa-clipboard-list"></i> Observações</h3>
+                    <p id="observacoesOS">Carregando observações...</p>
+                </div>
+
+                <div id="iniciarServico" class="button-container">
+                    <button id="btnIniciarServico" class="btn btn-primary">Iniciar Serviço</button>
+                </div>
+
+                <div id="servicosContainer" style="display: none;">
+
+                    <!-- Arquivos do Serviço -->
+                    <div id="arquivosServicoContainer" class="form-group">
+                        <h3><i class="fas fa-paperclip"></i> Arquivos do Serviço</h3>
+                        <div id="listaArquivosServico" class="arquivos-grid">
+                            <p id="loadingArquivosMsg" style="display: none;">Carregando arquivos...</p>
+                            <p id="noArquivosMsg" style="display: none;">Nenhum arquivo anexado a esta OS.</p>
+                        </div>
+                    </div>
+
+                    <h3>Serviços a Realizar</h3>
+                    <div id="listaServicos" class="service-checklist">
+                        <!-- Serviços serão carregados dinamicamente -->
+                    </div>
+
+                    <!-- Informações (MOVIDO DE VOLTA PARA DENTRO DO SERVICOSCONTAINER) -->
+                    <div class="form-group" id="informacoesContainer">
+                        <label for="informacoes">Informações:</label>
+                        <textarea id="informacoes" name="informacoes" rows="4" placeholder="Registre aqui informações adicionais sobre o serviço..."></textarea>
+                    </div>
+
+                    <!-- Seção de Anexos modificada para abrir Notion -->
+                    <div class="form-group">
+                        <label>Anexar/Gerenciar Documentos:</label>
+                        <button id="btnAbrirNotion" class="btn btn-secondary">Abrir OS no Notion</button>
+                        <p class="help-text">Clique no botão para abrir a OS no Notion e gerenciar arquivos diretamente lá.</p>
+                    </div>
+
+                    <div class="button-group">
+                        <button id="btnFinalizarServico" class="btn btn-primary">Serviço Finalizado</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modal para finalização -->
+        <div id="finalizacaoModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close-btn" id="btnCancelarFinalizacao">&times;</span>
+                <h3>Finalizar Serviço</h3>
+                <p>Selecione o status de finalização:</p>
+                <div class="modal-options">
+                    <button id="btnFinalizado" class="btn btn-success">Finalizado</button>
+                    <button id="btnPendenciasModal" class="btn btn-warning">Gerou Pendências</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- NOVO MODAL: Visualização de Arquivo -->
+        <div id="arquivoModal" class="modal" style="display: none;">
+            <div class="modal-content modal-arquivo">
+                <span class="close-btn" id="btnFecharArquivoModal">&times;</span>
+                <div id="arquivoModalContent">
+                    <!-- Conteúdo (imagem ou vídeo) será carregado dinamicamente aqui -->
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Perfecta - Sistema de Ordens de Serviço</p>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/services.js"></script>
+    <script src="js/relatorio.js"></script>
+</body>
+</html>
+

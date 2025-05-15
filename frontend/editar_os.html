@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Ordem de Serviço - OS Perfecta</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/additional.css">
+    <!-- Adicionar link para biblioteca de ícones se usada no projeto -->
+    <style>
+        /* Estilos específicos para a página de edição, se necessário */
+        .form-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="date"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[readonly],
+        textarea[readonly] {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+        .button-container {
+            text-align: right;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff; /* Cor principal do sistema */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3; /* Cor mais escura no hover */
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>OS Perfecta</h1>
+        <!-- Incluir navegação se houver -->
+    </header>
+
+    <main class="container">
+        <h2>Editar Ordem de Serviço</h2>
+        <div class="form-container" id="formEditarOS">
+            <p id="loadingMessage">Carregando dados da O.S....</p>
+            <!-- O formulário será preenchido dinamicamente via JS -->
+            <div class="form-group">
+                <label>Nº O.S.:</label>
+                <input type="text" id="numeroOS" readonly>
+            </div>
+            <div class="form-group">
+                <label>Cliente:</label>
+                <input type="text" id="clienteNome" readonly>
+            </div>
+            <div class="form-group">
+                <label>Endereço:</label>
+                <input type="text" id="endereco" readonly>
+            </div>
+            <div class="form-group">
+                <label>Cidade:</label>
+                <input type="text" id="cidade" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="local">Local/Condomínio:</label>
+                <select id="local" required>
+                    <option value="">Carregando locais...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="agendamentoInicial">Agendamento Inicial:</label>
+                <input type="date" id="agendamentoInicial">
+            </div>
+            <div class="form-group">
+                <label for="agendamentoFinal">Agendamento Final:</label>
+                <input type="date" id="agendamentoFinal">
+            </div>
+
+            <div class="form-group">
+                <label for="prestadores">Prestadores (Equipe):</label>
+                <select id="prestadores" multiple required>
+                    <option value="">Carregando equipes...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="responsavel">Responsável:</label>
+                <select id="responsavel">
+                    <option value="">Carregando responsáveis...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="tipoServico">Tipo de Serviço:</label>
+                <select id="tipoServico" required>
+                    <option value="">Carregando tipos...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="servicos">Serviços a Realizar:</label>
+                <textarea id="servicos" rows="4"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="observacoes">Observações:</label>
+                <textarea id="observacoes" rows="3"></textarea>
+            </div>
+
+            <div class="button-container">
+                <button id="btnAlterar" disabled>Alterar</button>
+                <button type="button" onclick="window.location.href='gerenciamento.html'">Cancelar</button>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <!-- Rodapé se houver -->
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/services.js"></script>
+    <script src="js/editar_os.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,548 @@
+// relatorio.js (Versão Corrigida com Simulação de API para Teste)
+
+// --- Funções Simuladas da API (services.js) ---
+// Estas funções simulam a resposta do backend para teste local
+async function getOrdemPorId(id) {
+  console.log(`[MOCK API] Chamando getOrdemPorId com ID: ${id}`);
+  // Simula um pequeno atraso da rede
+  await new Promise(resolve => setTimeout(resolve, 150));
+  if (id === "mock-real-id") {
+    return {
+      id: "mock-real-id",
+      numeroOS: `#mock-real`,
+      CL: "Cliente Real Ltda.",
+      ED: "Avenida Principal, 100",
+      CD: "Metrópole",
+      DS: new Date(Date.now() - 86400000).toISOString(), // Ontem
+      PS: ["Técnico A", "Técnico B"], // Lista de técnicos real
+      status: "Em andamento",
+      SR: "Reparo de componente Alfa\nVerificação de sistema Beta\nInstalação Gamma", // Serviços reais
+      pendencias: "",
+      realizado: "",
+      assinatura: "",
+      dataInicio: new Date(Date.now() - 3600000).toISOString(), // Há 1 hora
+      dataFim: null,
+    };
+  } else {
+    throw new Error("Ordem não encontrada (mock)");
+  }
+}
+
+async function getOrdemPorSlug(slug) {
+  console.log(`[MOCK API] Chamando getOrdemPorSlug com Slug: ${slug}`);
+  // Simula um pequeno atraso da rede
+  await new Promise(resolve => setTimeout(resolve, 150));
+  if (slug === "cliente-real-ltda-reparo-alfa") {
+    return {
+      id: "mock-real-id-slug",
+      numeroOS: `#mock-slug`,
+      CL: "Cliente Real (Slug) Ltda.",
+      ED: "Avenida Secundária, 200",
+      CD: "Metrópole",
+      DS: new Date(Date.now() - 172800000).toISOString(), // Anteontem
+      PS: ["Técnico C"], // Lista de técnicos real
+      status: "Em andamento",
+      SR: "Reparo de componente Delta", // Serviços reais
+      pendencias: "",
+      realizado: "",
+      assinatura: "",
+      dataInicio: new Date(Date.now() - 7200000).toISOString(), // Há 2 horas
+      dataFim: null,
+    };
+  } else {
+    throw new Error("Ordem não encontrada (mock slug)");
+  }
+}
+
+async function atualizarStatusOrdem(id, dados) {
+  console.log(`[MOCK API] Chamando atualizarStatusOrdem com ID: ${id} e Dados:`, dados);
+  // Simula um pequeno atraso da rede
+  await new Promise(resolve => setTimeout(resolve, 200));
+  // Simula sucesso
+  return { success: true, message: "Status atualizado (mock)" };
+}
+// --- Fim das Funções Simuladas ---
+
+document.addEventListener("DOMContentLoaded", async () => {
+  // --- Elementos do DOM ---
+  const numeroOS = document.getElementById("numeroOS");
+  const clienteOS = document.getElementById("clienteOS");
+  const enderecoOS = document.getElementById("enderecoOS");
+  const cidadeOS = document.getElementById("cidadeOS");
+  const dataOS = document.getElementById("dataOS");
+  const tecnicosOS = document.getElementById("tecnicosOS");
+  const statusOS = document.getElementById("statusOS");
+  const iniciarServicoDiv = document.getElementById("iniciarServico");
+  const btnIniciarServico = document.getElementById("btnIniciarServico");
+  const servicosContainer = document.getElementById("servicosContainer");
+  const listaServicos = document.getElementById("listaServicos");
+  const pendenciasTextarea = document.getElementById("pendencias");
+  const btnAbrirNotion = document.getElementById("btnAbrirNotion");
+  const btnFinalizarServico = document.getElementById("btnFinalizarServico");
+  const finalizacaoModal = document.getElementById("finalizacaoModal");
+  const btnFinalizado = document.getElementById("btnFinalizado");
+  const btnPendencias = document.getElementById("btnPendencias");
+  const btnCancelarFinalizacao = document.getElementById("btnCancelarFinalizacao");
+
+  // --- Variáveis Globais ---
+  let ordemId = ""; // ID da ordem de serviço atual
+  let slug = ""; // Slug da ordem de serviço atual (se aplicável)
+  let dadosOrdemAtual = null;
+
+  /**
+   * Exibe uma mensagem temporária na tela.
+   */
+  function mostrarMensagem(texto, tipo) {
+    console.log(`[${tipo.toUpperCase()}] ${texto}`);
+    const msgDiv = document.createElement("div");
+    msgDiv.style.position = "fixed";
+    msgDiv.style.top = "10px";
+    msgDiv.style.right = "10px";
+    msgDiv.style.padding = "10px";
+    msgDiv.style.borderRadius = "5px";
+    msgDiv.style.zIndex = "1001";
+    if (tipo === "sucesso") msgDiv.style.backgroundColor = "lightgreen";
+    else if (tipo === "erro") msgDiv.style.backgroundColor = "lightcoral";
+    else msgDiv.style.backgroundColor = "lightblue";
+    msgDiv.textContent = texto;
+    document.body.appendChild(msgDiv);
+    setTimeout(() => msgDiv.remove(), 3000);
+  }
+
+  /**
+   * Carrega os dados da Ordem de Serviço (OS) a partir do backend,
+   * buscando por ID ou Slug presentes na URL.
+   */
+  async function carregarDadosOS() {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      // Para teste, forçamos um ID ou Slug válido
+      ordemId = urlParams.get("id") || "mock-real-id"; // Força ID para teste
+      // slug = urlParams.get("slug") || "cliente-real-ltda-reparo-alfa"; // Ou força Slug para teste
+
+      if (!ordemId && !slug) {
+        mostrarMensagem("Ordem de serviço não encontrada (ID ou Slug ausente na URL).", "erro");
+        return;
+      }
+
+      let ordem;
+      if (slug) {
+        console.log(`Buscando ordem pelo slug: ${slug}`);
+        ordem = await getOrdemPorSlug(slug); // Chama a função simulada
+        if (ordem && ordem.id) {
+          ordemId = ordem.id;
+        } else {
+          throw new Error("Erro ao buscar ordem pelo slug ou ID não retornado.");
+        }
+      } else if (ordemId) {
+        console.log(`Buscando ordem pelo ID: ${ordemId}`);
+        ordem = await getOrdemPorId(ordemId); // Chama a função simulada
+        if (!ordem || !ordem.id) {
+          throw new Error("Erro ao buscar ordem pelo ID ou ID não retornado.");
+        }
+      } else {
+        mostrarMensagem("Parâmetro ID ou Slug não encontrado na URL.", "erro");
+        return;
+      }
+
+      dadosOrdemAtual = ordem;
+      console.log("Dados da Ordem Carregados (Simulado):", dadosOrdemAtual);
+
+      numeroOS.textContent = `#${ordemId.substring(0, 8)}`;
+      clienteOS.textContent = ordem.CL || "N/A";
+      enderecoOS.textContent = ordem.ED || "N/A";
+      cidadeOS.textContent = ordem.CD || "N/A";
+      dataOS.textContent = formatarData(ordem.DS || "");
+
+      let prestadoresTexto = "N/A";
+      if (Array.isArray(ordem.PS)) {
+        prestadoresTexto = ordem.PS.join(", ");
+      } else if (typeof ordem.PS === "string") {
+        prestadoresTexto = ordem.PS;
+      } else if (typeof ordem.PS === "object" && ordem.PS !== null) {
+        prestadoresTexto = Object.values(ordem.PS).join(", ");
+      }
+      tecnicosOS.textContent = prestadoresTexto;
+      statusOS.textContent = ordem.status || "Não iniciada";
+
+      if (ordem.status === "Não iniciada") {
+        iniciarServicoDiv.style.display = "block";
+        servicosContainer.style.display = "none";
+      } else {
+        iniciarServicoDiv.style.display = "none";
+        servicosContainer.style.display = "block";
+        preencherListaServicos(ordem.SR || "");
+      }
+
+      if (ordem.status === "Concluído" || ordem.status === "Gerou Pendências") {
+        desabilitarEdicao();
+      }
+      mostrarMensagem("Dados da OS carregados (simulado).", "info");
+    } catch (error) {
+      console.error("Erro detalhado ao carregar dados da OS:", error);
+      mostrarMensagem(`Erro ao carregar dados da OS: ${error.message}`, "erro");
+    }
+  }
+
+  /**
+   * Formata uma data ISO para o formato local.
+   * @param {string} dataISO - Data em formato ISO.
+   * @returns {string} Data formatada.
+   */
+  function formatarData(dataISO) {
+    if (!dataISO) return "N/A";
+    try {
+      return new Date(dataISO).toLocaleDateString();
+    } catch (e) {
+      console.error("Erro ao formatar data:", e);
+      return dataISO;
+    }
+  }
+
+  /**
+   * Preenche a lista de serviços a realizar na interface.
+   * Layout compacto e profissional para minimizar rolagem.
+   */
+  function preencherListaServicos(servicosTexto) {
+    listaServicos.innerHTML = "";
+    const servicos = servicosTexto.split("\n").filter((s) => s.trim() !== "");
+    
+    if (servicos.length === 0) {
+      listaServicos.innerHTML = "<p>Nenhum serviço específico cadastrado.</p>";
+      return;
+    }
+
+    // Obter a lista de técnicos do campo tecnicosOS
+    let tecnicos = [];
+    const tecnicosTexto = tecnicosOS.textContent;
+    if (tecnicosTexto && tecnicosTexto !== "N/A") {
+      tecnicos = tecnicosTexto.split(", ").map(t => t.trim());
+    }
+    console.log("Técnicos disponíveis para dropdown:", tecnicos);
+
+    servicos.forEach((servico, index) => {
+      // Criar o item de serviço com layout em grid
+      const servicoItem = document.createElement("div");
+      servicoItem.className = "service-item";
+      
+      // Descrição do serviço
+      const descricao = document.createElement("p");
+      descricao.textContent = servico;
+      
+      // Dropdown de técnicos
+      const tecnicosSelection = document.createElement("div");
+      tecnicosSelection.className = "tecnicos-selection";
+      
+      const dropdownButton = document.createElement("button");
+      dropdownButton.type = "button";
+      dropdownButton.className = "dropdown-button";
+      dropdownButton.textContent = "Selecionar Técnicos";
+      dropdownButton.setAttribute("onclick", `toggleTecnicosList(${index})`);
+      
+      const dropdownContent = document.createElement("div");
+      dropdownContent.id = `tecnicosList-${index}`;
+      dropdownContent.className = "dropdown-content";
+      
+      // Adicionar técnicos ao dropdown
+      if (tecnicos.length > 0) {
+        tecnicos.forEach((tecnico, tecIndex) => {
+          const dropdownItem = document.createElement("div");
+          dropdownItem.className = "dropdown-item";
+          
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.id = `tecnico-${index}-${tecIndex}`;
+          checkbox.name = `tecnico-${index}-${tecIndex}`;
+          checkbox.value = tecnico;
+          checkbox.className = "tecnico-checkbox";
+          checkbox.setAttribute("onchange", `updateSelectedTecnicos(${index})`);
+          
+          const label = document.createElement("label");
+          label.htmlFor = `tecnico-${index}-${tecIndex}`;
+          label.textContent = tecnico;
+          
+          dropdownItem.appendChild(checkbox);
+          dropdownItem.appendChild(label);
+          dropdownContent.appendChild(dropdownItem);
+        });
+      } else {
+        const dropdownItem = document.createElement("div");
+        dropdownItem.className = "dropdown-item";
+        dropdownItem.textContent = "Nenhum técnico disponível";
+        dropdownContent.appendChild(dropdownItem);
+      }
+      
+      // Container do dropdown
+      const dropdownContainer = document.createElement("div");
+      dropdownContainer.className = "dropdown-container";
+      dropdownContainer.id = `dropdown-container-${index}`;
+      dropdownContainer.appendChild(dropdownButton);
+      dropdownContainer.appendChild(dropdownContent);
+      
+      // Div para técnicos selecionados (oculto pelo CSS)
+      const selectedTecnicos = document.createElement("div");
+      selectedTecnicos.id = `selectedTecnicos-${index}`;
+      selectedTecnicos.className = "selected-tecnicos";
+      selectedTecnicos.textContent = "Nenhum técnico selecionado";
+      
+      dropdownContainer.appendChild(selectedTecnicos);
+      tecnicosSelection.appendChild(dropdownContainer);
+      
+      // Status (Resolvido/Pendente)
+      const statusSelection = document.createElement("div");
+      statusSelection.className = "status-selection";
+      
+      // Opção Resolvido
+      const labelResolvido = document.createElement("label");
+      labelResolvido.className = "radio-label";
+      
+      const radioResolvido = document.createElement("input");
+      radioResolvido.type = "radio";
+      radioResolvido.name = `status-${index}`;
+      radioResolvido.value = "resolvido";
+      
+      const spanResolvido = document.createElement("span");
+      spanResolvido.textContent = "Resolvido";
+      
+      labelResolvido.appendChild(radioResolvido);
+      labelResolvido.appendChild(spanResolvido);
+      
+      // Opção Pendente
+      const labelPendente = document.createElement("label");
+      labelPendente.className = "radio-label";
+      
+      const radioPendente = document.createElement("input");
+      radioPendente.type = "radio";
+      radioPendente.name = `status-${index}`;
+      radioPendente.value = "pendente";
+      
+      const spanPendente = document.createElement("span");
+      spanPendente.textContent = "Pendente";
+      
+      labelPendente.appendChild(radioPendente);
+      labelPendente.appendChild(spanPendente);
+      
+      statusSelection.appendChild(labelResolvido);
+      statusSelection.appendChild(labelPendente);
+      
+      // Montar o item de serviço completo
+      servicoItem.appendChild(descricao);
+      servicoItem.appendChild(tecnicosSelection);
+      servicoItem.appendChild(statusSelection);
+      
+      listaServicos.appendChild(servicoItem);
+    });
+  }
+
+  /**
+   * Desabilita todos os campos de edição e botões.
+   */
+  function desabilitarEdicao() {
+    document.querySelectorAll("input, textarea, button").forEach((el) => {
+      if (el.id !== "btnCancelarFinalizacao") {
+        el.disabled = true;
+      }
+    });
+    const mensagem = document.createElement("div");
+    mensagem.className = "alert alert-info";
+    mensagem.textContent = "Esta ordem de serviço já foi finalizada e não pode ser editada.";
+    // Garante que o elemento exista antes de inserir
+    const formContainer = document.querySelector(".form-container");
+    const dadosOSDiv = document.getElementById("dadosOS"); // Supondo que exista um div com id="dadosOS"
+    if (formContainer && dadosOSDiv) {
+        formContainer.insertBefore(mensagem, dadosOSDiv);
+    } else if (formContainer) {
+        formContainer.prepend(mensagem);
+    }
+  }
+
+  /**
+   * Atualiza o status da OS para "Em andamento".
+   */
+  async function iniciarServico() {
+    try {
+      btnIniciarServico.disabled = true;
+      mostrarMensagem("Iniciando serviço...", "info");
+      await atualizarStatusOrdem(ordemId, {
+        status: "Em andamento",
+        dataInicio: new Date().toISOString(),
+      });
+      statusOS.textContent = "Em andamento";
+      iniciarServicoDiv.style.display = "none";
+      servicosContainer.style.display = "block";
+      
+      await carregarDadosOS(); // Recarrega para preencher serviços, etc.
+      mostrarMensagem("Serviço iniciado com sucesso!", "sucesso");
+    } catch (error) {
+      console.error("Erro ao iniciar serviço:", error);
+      mostrarMensagem(`Erro ao iniciar serviço: ${error.message}`, "erro");
+    } finally {
+      btnIniciarServico.disabled = false;
+    }
+  }
+
+  /**
+   * Abre a página do Notion correspondente à OS atual em uma nova janela.
+   * Permite que o usuário anexe arquivos diretamente na interface do Notion.
+   */
+  function abrirOSNoNotion() {
+    try {
+      if (!ordemId) {
+        mostrarMensagem("ID da ordem de serviço não disponível.", "erro");
+        return;
+      }
+      
+      // Construir a URL do Notion usando o ID da OS
+      const notionUrl = `https://www.notion.so/${ordemId.replace(/-/g, ")}`;
+            window.open(notionUrl, '_blank');
+      
+      mostrarMensagem("Página do Notion aberta em uma nova aba. Anexe os arquivos diretamente lá.", "info");
+    } catch (e) {
+      console.error("Erro ao tentar abrir Notion:", e);
+      mostrarMensagem("Erro ao tentar abrir Notion.", "erro");
+    }
+  }
+
+  /**
+   * Coleta os dados do formulário e envia para o backend   * @param {string} tipoFinalizacao - O status final da OS ('Concluído' ou 'Gerou Pendências').  */
+  async function finalizarServico(tipoFinalizacao) {
+    try {
+      // Desabilita botões durante o processamento
+      mostrarMensagem("Finalizando serviço e processando dados...", "info");
+      btnFinalizado.disabled = true;
+      btnPendencias.disabled = true;
+      btnCancelarFinalizacao.disabled = true;
+
+      // 1. Coleta status dos serviços realizados e técnicos selecionados
+      console.log("Iniciando coleta de dados dos serviços...");
+      const servicosRealizados = [];
+      document.querySelectorAll(".service-item").forEach((item, index) => {
+        const servico = item.querySelector("p").textContent;
+        console.log(`[Serviço ${index}] Descrição: ${servico}`);
+        
+        // Verificar status (Resolvido/Pendente)
+        const statusResolvido = item.querySelector("input[value=\'resolvido\']").checked        const statusPendente = item.querySelector("input[value='pendente']").checked;     let status = "Não verificado";
+        if (statusResolvido) status = "Resolvido";
+        if (statusPendente) status = "Pendente";
+        console.log(`[Serviço ${index}] Status selecionado: ${status}`);
+        
+        // Coletar técnicos selecionados para este serviço
+        const tecnicosSelecionados = [];
+        item.querySelectorAll(".dropdown-item input[type=\'checkbox\']:checked").forEach(checkbox => {       tecnicosSelecionados.push(checkbox.value);
+               console.log(`[Serviço ${index}] Técnicos selecionados: ${tecnicosSelecionados.join(", ") || "Nenhum"}`);        // Formatar a string no formato solicitado: "Status - Serviço - Técnicos"
+        let tecnicosTexto = tecnicosSelecionados.length > 0 ? tecnicosSelecionados.join(", ") : "Não especificado";
+        const linhaRealizado = `${status} - ${servico} - ${tecnicosTexto}`;
+        servicosRealizados.push(linhaRealizado);
+        console.log(`[Serviço ${index}] Linha formatada: ${linhaRealizado}`);
+      });
+      console.log("Coleta de dados dos serviços concluída.");
+
+      // 2. Prepara dados para envio
+      const dadosFinalizacao = {
+        status: tipoFinalizacao,
+        dataFim: new Date().toISOString(),
+        realizado: servicosRealizados.join("\n"),
+        pendencias: pendenciasTextarea.value,
+        assinatura: "" // Assinatura não é mais coletada aqui
+      };
+      console.log("Dados preparados para envio:", JSON.stringify(dadosFinalizacao, null, 2));
+
+      // 3. Envia dados para o backend
+      mostrarMensagem("Enviando dados para o servidor...", "info");
+      console.log(`Enviando para atualizarStatusOrdem com ID: ${ordemId}`);
+      const response = await atualizarStatusOrdem(ordemId, dadosFinalizacao); // Chama a função simulada
+      console.log("Resposta do backend (atualizarStatusOrdem):", response);
+      
+      if (response && response.success) {
+        // 4. Atualiza a interface
+        statusOS.textContent = tipoFinalizacao;
+        desabilitarEdicao();
+        mostrarMensagem("Serviço finalizado com sucesso!", "sucesso");
+      } else {
+        throw new Error("Resposta do servidor não indicou sucesso.");
+      }
+    } catch (error) {
+      console.error("Erro detalhado ao finalizar serviço:", error);
+      mostrarMensagem(`Erro ao finalizar serviço: ${error.message}. Tente novamente.`, "erro");
+    } finally {
+      // Reabilita os botões do modal independentemente do resultado
+      btnFinalizado.disabled = false;
+      btnPendencias.disabled = false;
+      btnCancelarFinalizacao.disabled = false;
+    }
+  }
+
+  // --- Funções Globais para HTML (onclick) ---
+  window.toggleTecnicosList = (index) => {
+    try {
+      const list = document.getElementById(`tecnicosList-${index}`);
+      const container = document.getElementById(`dropdown-container-${index}`);
+      if (list && container) {
+        list.classList.toggle("show");
+        // Adiciona a classe 'open' ao tecnicos-selection para a seta girar
+        container.closest('.tecnicos-selection').classList.toggle("open"); 
+      }
+    } catch (error) {
+      console.error("Erro ao alternar lista de técnicos:", error);
+    }
+  };
+
+  window.updateSelectedTecnicos = (index) => {
+    try {
+      const container = document.getElementById(`dropdown-container-${index}`);
+      const selectedDiv = document.getElementById(`selectedTecnicos-${index}`);
+      if (!container || !selectedDiv) return;      const checkboxes = container.querySelectorAll(".dropdown-item input[type=\'checkbox\']:checked");     const selectedNames = Array.from(checkboxes).map(cb => cb.value);
+
+      // Atualiza o texto do div oculto (mantido para compatibilidade)
+      if (selectedNames.length === 0) {
+        selectedDiv.textContent = "Nenhum técnico selecionado";
+      } else if (selectedNames.length === 1) {
+        selectedDiv.textContent = `${selectedNames[0]} selecionado`;
+      } else {
+        selectedDiv.textContent = `${selectedNames.length} técnicos selecionados`;
+      }
+
+      // Atualiza o texto do botão principal
+      const button = container.querySelector(".dropdown-button");
+      if (button) {
+        if (selectedNames.length === 0) {
+          button.textContent = "Selecionar Técnicos";
+        } else if (selectedNames.length === 1) {
+          button.textContent = selectedNames[0];
+        } else {
+          button.textContent = `${selectedNames.length} Técnicos`;
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar técnicos selecionados:", error);
+    }
+  };
+
+  // --- Event Listeners ---
+  btnIniciarServico.addEventListener("click", iniciarServico);
+  btnFinalizarServico.addEventListener("click", () => finalizacaoModal.style.display = "block");
+  btnFinalizado.addEventListener("click", () => {
+    finalizacaoModal.style.display = "none";    finalizarServico("Concluído");});
+  btnPendencias.addEventListener("click", () => {
+    finalizacaoModal.style.display = "non    finalizarServico("Gerou Pendências");
+  });
+  btnCancelarFinalizacao.addEventListener("click", () => finalizacaoModal.style.display = "none");
+  btnAbrirNotion.addEventListener("click", abrirOSNoNotion);
+
+  // Fechar dropdown se clicar fora
+  document.addEventListener("click", function(event) {
+    document.querySelectorAll(".tecnicos-selection.open").forEach(selectionDiv => {
+      const container = selectionDiv.querySelector('.dropdown-container');
+      if (container && !container.contains(event.target)) {
+        const index = container.id.split("-")[2];
+        const list = document.getElementById(`tecnicosList-${index}`);
+        if (list) list.classList.remove("show");
+        selectionDiv.classList.remove("open");
+      }
+    });
+  });
+
+  // --- Inicialização ---
+  await carregarDadosOS();
+});
+

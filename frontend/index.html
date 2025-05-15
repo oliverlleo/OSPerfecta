@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Ordens de Serviço - Perfecta</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/additional.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Select2 CSS -->
+
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="img/logo.png" alt="Perfecta Logo" class="logo">
+            <h1>Sistema de Ordens de Serviço</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html" class="active">Cadastro</a></li>
+                <li><a href="acompanhamento.html">Acompanhamento de Ordens</a></li>
+                <li><a href="programacao.html">Programação de Trabalho</a></li>
+                <li><a href="gerenciamento.html">Gerenciamento</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div id="notification-area" class="notification-area"></div>
+        <section class="form-container">
+            <h2>ORDEM DE SERVIÇO</h2>
+            <form id="osForm" novalidate>
+                <div class="form-group">
+                    <label for="clienteAutocomplete">Cliente:</label> <!-- Changed 'for' attribute -->
+                    <input type="text" id="clienteAutocomplete" placeholder="Digite para pesquisar o cliente..." class="form-control" required> <!-- Added input, added required -->
+                    <div id="clienteResultados" class="autocomplete-results"></div> <!-- Added results container -->
+                    <select id="cliente" name="cliente" required style="display: none;"> <!-- Kept original select, added style to hide -->
+                        <option value="">Selecione um cliente</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="local">Local:</label>
+                    <select id="local" name="local" required disabled>
+                        <option value="">Selecione um local</option>
+                    </select>
+                    <small>Selecione um cliente primeiro para carregar os locais disponíveis</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="endereco">Endereço:</label>
+                    <input type="text" id="endereco" name="endereco" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="cidade">Cidade:</label>
+                    <input type="text" id="cidade" name="cidade" readonly>
+                </div>
+
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label for="agendamentoInicial">Agendamento Inicial:</label>
+                        <input type="date" id="agendamentoInicial" name="agendamentoInicial" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="agendamentoFinal">Agendamento Final:</label>
+                        <input type="date" id="agendamentoFinal" name="agendamentoFinal" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="prestadores">Prestadores de Serviço:</label>
+                    <select id="prestadores" name="prestadores" multiple required>
+                        <!-- Opções serão carregadas dinamicamente -->
+                    </select>
+                    <small>Segure Ctrl para selecionar múltiplos prestadores</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="responsavel">Responsável:</label>
+                    <select id="responsavel" name="responsavel" required>
+                        <option value="">Selecione um responsável</option>
+                        <!-- Opções serão carregadas dinamicamente -->
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="tipoServico">Tipo de serviço:</label>
+                    <select id="tipoServico" name="tipoServico" required>
+                        <option value="">Selecione o tipo</option>
+                        <option value="Fábrica">Fábrica</option>
+                        <option value="Instalação">Instalação</option>
+                        <option value="Manutenção">Manutenção</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="servicos">Serviços a serem realizados:</label>
+                    <textarea id="servicos" name="servicos" rows="4" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="observacoes">Observações:</label>
+                    <textarea id="observacoes" name="observacoes" rows="4"></textarea>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" id="novaOrdem" class="btn btn-secondary">Limpar</button>
+                    <button type="submit" id="cadastrarOS" class="btn btn-primary">Incluir</button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Perfecta - Sistema de Ordens de Serviço</p>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/services.js"></script>
+    <script src="js/cadastro.js"></script>
+    <!-- jQuery (dependência do Select2) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Select2 JS -->
+
+</body>
+</html>

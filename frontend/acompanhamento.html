@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acompanhamento de Ordens - Perfecta</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/additional.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="img/logo.png" alt="Perfecta Logo" class="logo">
+            <h1>Sistema de Ordens de Serviço</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Cadastro</a></li>
+                <li><a href="acompanhamento.html" class="active">Acompanhamento de Ordens</a></li>
+                <li><a href="programacao.html">Programação de Trabalho</a></li>
+                <li><a href="gerenciamento.html">Gerenciamento</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div id="notification-area" class="notification-area"></div>
+        <section class="filters">
+            <h3 class="filters-title">Filtros</h3>
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label for="filtroData">Data:</label>
+                    <input type="date" id="filtroData" name="filtroData">
+                </div>
+                <div class="filter-group">
+                    <label for="filtroCliente">Cliente:</label>
+                    <select id="filtroCliente" name="filtroCliente">
+                        <option value="">Selecione um cliente</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filtroStatusMulti">Status:</label>
+                    <div id="filtroStatusMulti" class="multi-select-container">
+                        <div class="multi-select-selected-text">Todos</div>
+                        <div class="multi-select-options">
+                            <div class="multi-select-option selected" data-value="">Todos</div>
+                            <div class="multi-select-option" data-value="Não iniciada">Não iniciada</div>
+                            <div class="multi-select-option" data-value="Em andamento">Em andamento</div>
+                            <div class="multi-select-option" data-value="Concluído">Concluído</div>
+                            <div class="multi-select-option" data-value="Gerou Pendências">Gerou Pendências</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label for="filtroNOS">Número O.S.:</label>
+                    <input type="number" id="filtroNOS" name="filtroNOS" placeholder="Digite o número">
+                </div>
+            </div>
+            <div class="filter-buttons">
+                <button id="btnFiltrar" class="btn btn-primary">Filtrar</button>
+                <button id="btnLimpar" class="btn btn-secondary">Limpar Filtros</button>
+                <button id="btnMostrarTodas" class="btn btn-secondary">Mostrar Todas</button>
+            </div>
+        </section>
+
+        <section class="ordens-container">
+            <h2>Ordens de Serviço</h2>
+            <div class="table-container">
+                <table id="tabelaOrdens">
+                    <thead>
+                        <tr>
+                            <th>Número</th>
+                            <th>Inicial - Final</th>
+                            <th>Cliente</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dados serão carregados dinamicamente -->
+                    </tbody>
+                </table>
+            </div>
+            <!-- Controles de Paginação -->
+            <div id="paginacaoControles" class="pagination-controls">
+                <button id="btnPaginaAnterior" class="btn btn-secondary" disabled>&lt; Anterior</button>
+                <span id="infoPagina">Página 1 de 1</span>
+                <button id="btnProximaPagina" class="btn btn-secondary" disabled>Próxima &gt;</button>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Perfecta - Sistema de Ordens de Serviço</p>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/services.js"></script>
+    <script src="js/acompanhamento.js"></script>
+</body>
+</html>
+

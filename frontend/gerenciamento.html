@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Ordens de Serviço - OS Perfecta</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/additional.css">
+    <!-- Adicionar link para biblioteca de ícones se usada no projeto (ex: Font Awesome) -->
+    <style>
+        /* Estilos específicos para a página de gerenciamento, se necessário */
+        .filtros-container {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .filtro-item label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .filtro-item input,
+        .filtro-item select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+        .tabela-os table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .tabela-os th,
+        .tabela-os td {
+            border: 1px solid #dee2e6;
+            padding: 8px;
+            text-align: left;
+        }
+        .tabela-os th {
+            background-color: #e9ecef;
+        }
+        .tabela-os .acoes button {
+            margin-right: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .tabela-os .acoes button:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="img/logo.png" alt="Perfecta Logo" class="logo">
+            <h1>Sistema de Ordens de Serviço</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Cadastro</a></li>
+                <li><a href="acompanhamento.html">Acompanhamento de Ordens</a></li>
+                <li><a href="programacao.html">Programação de Trabalho</a></li>
+                <li><a href="gerenciamento.html" class="active">Gerenciamento</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h2>Filtros</h2>
+        <div class="filtros-container" id="filtrosOS">
+            <div class="filtro-item">
+                <label for="filtroNumOS">Nº O.S.:</label>
+                <input type="text" id="filtroNumOS" name="filtroNumOS">
+            </div>
+            <div class="filtro-item">
+                <label for="filtroCliente">Cliente:</label>
+                <input type="text" id="filtroCliente" name="filtroCliente">
+            </div>
+            <div class="filtro-item">
+                <label for="filtroLocal">Local:</label>
+                <input type="text" id="filtroLocal" name="filtroLocal">
+            </div>
+            <div class="filtro-item">
+                <label>Status:</label> 
+                <div id="filtroStatusMultiGerenciamento" class="multi-select-container" aria-label="Filtro de Status">
+                    <div class="multi-select-selected-text">Todos</div>
+                    <div class="multi-select-options">
+                        <div class="multi-select-option selected" data-value="">Todos</div>
+                        <div class="multi-select-option" data-value="Não iniciada">Não iniciada</div>
+                        <div class="multi-select-option" data-value="Em andamento">Em andamento</div>
+                        <div class="multi-select-option" data-value="Concluído">Concluído</div>
+                        <div class="multi-select-option" data-value="Gerou Pendências">Gerou Pendências</div>
+                    </div>
+                </div>
+            </div>
+            <div class="filtro-item">
+                <label for="filtroAgInicial">Agend. Inicial:</label>
+                <input type="date" id="filtroAgInicial" name="filtroAgInicial">
+            </div>
+            <div class="filtro-item">
+                <label for="filtroAgFinal">Agend. Final:</label>
+                <input type="date" id="filtroAgFinal" name="filtroAgFinal">
+            </div>
+            <div class="filtro-item">
+                <label for="filtroResponsavel">Responsável:</label>
+                <input type="text" id="filtroResponsavel" name="filtroResponsavel">
+            </div>
+            <div class="filtro-item">
+                <label for="filtroPrestador">Prestador:</label>
+                <input type="text" id="filtroPrestador" name="filtroPrestador">
+            </div>
+            <div class="filtro-item" style="grid-column: span 2; text-align: right;">
+                 <button id="btnLimparFiltros">Limpar Filtros</button>
+                 <button id="btnAplicarFiltros">Aplicar Filtros</button>
+            </div>
+        </div>
+
+        <h2>Ordens de Serviço</h2>
+        <div class="tabela-os">
+            <table id="tabelaOrdens">
+                <thead>
+                    <tr>
+                        <th>Nº O.S.</th>
+                        <th>Cliente</th>
+                        <th>Local</th>
+                        <th>Status</th>
+                        <th>Ag. Inicial</th>
+                        <th>Ag. Final</th>
+                        <th>Responsável</th>
+                        <th>Prestador(es)</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="corpoTabelaOrdens">
+                    <!-- Linhas da tabela serão carregadas dinamicamente -->
+                    <tr>
+                        <td colspan="9" style="text-align: center;">Carregando ordens...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <footer>
+        <!-- Rodapé padrão do sistema -->
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/services.js"></script>
+    <script src="js/gerenciamento.js"></script>
+</body>
+</html>
+

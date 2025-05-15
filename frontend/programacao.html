@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programação de Trabalho - Perfecta</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/additional.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="img/logo.png" alt="Perfecta Logo" class="logo">
+            <h1>Sistema de Ordens de Serviço</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Cadastro</a></li>
+                <li><a href="acompanhamento.html">Acompanhamento de Ordens</a></li>
+                <li><a href="programacao.html" class="active">Programação de Trabalho</a></li>
+                <li><a href="gerenciamento.html">Gerenciamento</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="date-display">
+            <h2><i class="fas fa-calendar-alt"></i> <span id="dataAtual">Programação de Trabalho</span></h2>
+            <input type="date" id="seletorData" class="date-selector">
+        </div>
+
+        <div class="export-buttons">
+            <button id="exportarPDF" class="btn btn-primary"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
+            <button id="exportarJPEG" class="btn btn-primary"><i class="fas fa-file-image"></i> Exportar JPEG</button>
+            <button id="exportarTexto" class="btn btn-primary"><i class="fas fa-file-alt"></i> Exportar Texto (WhatsApp)</button>
+            <button id="gerarOS" class="btn btn-success"><i class="fas fa-plus"></i> Gerar OS</button>
+        </div>
+
+        <section id="obrasExternas" class="service-section">
+            <h3><i class="fas fa-building"></i> Obras Externas</h3>
+            <div id="listaObrasExternas" class="service-list">
+                <!-- Conteúdo será carregado dinamicamente -->
+                <p class="empty-message">Nenhuma ordem de serviço de instalação ou manutenção cadastrada.</p>
+            </div>
+        </section>
+
+        <section id="servicosFabrica" class="service-section">
+            <h3><i class="fas fa-cogs"></i> Serviços de Fábrica</h3>
+            <div id="listaServicosFabrica" class="service-list">
+                <!-- Conteúdo será carregado dinamicamente -->
+                <p class="empty-message">Nenhuma ordem de serviço de fábrica cadastrada.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Perfecta - Sistema de Ordens de Serviço</p>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/services.js"></script>
+    <script src="js/agendatrabalho.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</body>
+</html>

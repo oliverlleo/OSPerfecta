@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizar Ordem de Serviço - PerfectaOS</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/visualizar_os_specific.css"> <!-- CSS específico para esta página -->
+</head>
+<body class="visualizar-os-page"> <!-- Classe pai para isolar estilos -->
+    <div class="container">
+        <header>
+            <img src="img/logo.png" alt="Logo Perfecta" class="logo">
+            <h1>Visualizar Ordem de Serviço</h1>
+        </header>
+
+        <div id="loadingMessage">Carregando dados...</div>
+
+        <main id="viewOsContainer" style="display: block;"> <!-- Mantém visível, JS controlará o loading -->
+            
+            <section class="info-section">
+                <h2>Informações Gerais da O.S.</h2>
+                <div class="info-grid col-3">
+                    <div><strong>Nº O.S.:</strong> <span id="numeroOS"></span></div>
+                    <div><strong>Cliente:</strong> <span id="clienteNome"></span></div>
+                    <div><strong>Endereço:</strong> <span id="endereco"></span></div>
+                    <div><strong>Cidade:</strong> <span id="cidade"></span></div>
+                    <div><strong>Local/Condomínio:</strong> <span id="local"></span></div>
+                    <div><strong>Status:</strong> <span id="statusOS"></span></div>
+                    <div><strong>Tipo de Serviço:</strong> <span id="tipoServico"></span></div>
+                </div>
+            </section>
+
+            <section class="info-section">
+                <h2>Agendamento e Responsáveis</h2>
+                <div class="info-grid col-3">
+                    <div><strong>Agendamento Inicial:</strong> <span id="agendamentoInicial"></span></div>
+                    <div><strong>Agendamento Final:</strong> <span id="agendamentoFinal"></span></div>
+                    <div><strong>Data da Solicitação:</strong> <span id="dataSolicitacao"></span></div>
+                    <div><strong>Responsável Solicitação:</strong> <span id="responsavel"></span></div>
+                    <div class="full-width-mobile"><strong>Equipe/Técnicos:</strong> <span id="prestadores"></span></div>
+                    <div><strong>Data Início Serviço:</strong> <span id="dataInicioServico"></span></div>
+                    <div><strong>Data Finalizado:</strong> <span id="dataFinalizado"></span></div>
+                </div>
+            </section>
+
+            <section class="info-section">
+                <h2>Detalhes do Serviço</h2>
+                <div class="details-list">
+                    <div><strong>Serviços a Executar:</strong><br><span id="servicos" class="text-block"></span></div>
+                    <div><strong>Observações da OS:</strong><br><span id="observacoes" class="text-block"></span></div>
+                    <div><strong>Serviços Realizados:</strong><br><span id="servicosRealizados" class="text-block"></span></div>
+                    <div><strong>Pendências:</strong><br><span id="pendencias" class="text-block"></span></div>
+                </div>
+            </section>
+
+            <section class="info-section">
+                <h2>Outras Informações</h2>
+                <div class="details-list">
+                    <div><strong>Histórico OS (Reabertura):</strong><br><span id="historicoOS" class="text-block"></span></div>
+                </div>
+            </section>
+
+            <div class="actions">
+                <button onclick="window.location.href=\'gerenciamento.html\'">Voltar para Gerenciamento</button>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 Perfecta Manutenção e Serviços. Todos os direitos reservados.</p>
+        </footer>
+    </div>
+    <script src="js/config.js"></script>
+    <script src="js/services.js"></script>
+    <script src="js/visualizar_os.js"></script>
+</body>
+</html>

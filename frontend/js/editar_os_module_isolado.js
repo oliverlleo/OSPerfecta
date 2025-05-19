@@ -250,7 +250,7 @@
                 console.log("[Edição Dedicada - Salvar] Ordem atualizada com sucesso!");
                 mostrarMensagemEditarIsolado("Ordem de Serviço atualizada com sucesso (rota dedicada)! Redirecionando...", "info");
                 setTimeout(() => {
-                    window.location.href = "gerenciamento.html"; 
+                    window.location.replace("gerenciamento.html"); 
                 }, 2000);
 
             } catch (error) {
@@ -263,6 +263,15 @@
 
         if (btnAlterar) {
             btnAlterar.addEventListener("click", handleAlterarOSUsandoRotaDedicada);
+        }
+        
+        // Adicionar evento de clique para o botão Cancelar
+        const btnCancelar = document.getElementById("btnCancelar");
+        if (btnCancelar) {
+            btnCancelar.addEventListener("click", function() {
+                // Usar location.replace para evitar problemas de histórico do navegador
+                window.location.replace("gerenciamento.html");
+            });
         }
         
         if (formEditarOS && loadingMessage && numeroOSInput && clienteNomeInput && btnAlterar) {

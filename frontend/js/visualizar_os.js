@@ -115,3 +115,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 // É crucial que a função getOrdemDetalhada em services.js (e seu endpoint de backend correspondente)
 // seja capaz de buscar todos os campos listados acima diretamente do Notion e formatá-los adequadamente
 // (especialmente campos rich_text e relações como Cliente e Local).
+
+// Adicionar event listener para o botão de voltar ao gerenciamento
+document.addEventListener("DOMContentLoaded", function() {
+    const btnVoltarGerenciamento = document.getElementById("btnVoltarGerenciamento");
+    if (btnVoltarGerenciamento) {
+        btnVoltarGerenciamento.addEventListener("click", function() {
+            // Usar location.replace para evitar problemas de histórico do navegador
+            window.location.replace("gerenciamento.html");
+        });
+    }
+});

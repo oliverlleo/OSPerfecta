@@ -230,38 +230,23 @@ const btnAplicarFiltros = document.getElementById("btnAplicarFiltros");
 if (btnAplicarFiltros) {
     btnAplicarFiltros.addEventListener("click", () => {
         const statusSelecionados = getSelectedStatusValuesGerenciamento();
-        
-        // Mapeamento correto dos campos do frontend para os nomes esperados pelo backend/Notion
         const filtros = {
-            // Mapear para o campo correto no Notion (O.S. -> unique_id)
-            "O.S.": document.getElementById("filtroNumOS").value.trim(),
-            
-            // Mapear para o campo correto no Notion (Cliente -> relation)
-            Cliente: document.getElementById("filtroCliente").value.trim(),
-            
-            // Mapear para o campo correto no Notion (LOCAL -> relation)
-            LOCAL: document.getElementById("filtroLocal").value.trim(),
-            
-            // Mapear para o campo correto no Notion (Status -> status)
-            Status: (statusSelecionados.length === 1 && statusSelecionados[0] === "") ? null : statusSelecionados.join(","),
-            
-            // Mapear para os campos corretos no Notion (datas)
-            "Agendamento Inicial": document.getElementById("filtroAgInicial").value,
-            "Agendamento Final": document.getElementById("filtroAgFinal").value,
-            
-            // Mapear para os campos corretos no Notion
-            Responsável: document.getElementById("filtroResponsavel").value.trim(),
-            Equipe: document.getElementById("filtroPrestador").value.trim(),
+            numeroOS: document.getElementById("filtroNumOS").value.trim(),
+            cliente: document.getElementById("filtroCliente").value.trim(),
+            local: document.getElementById("filtroLocal").value.trim(),
+            // Se 'Todos' for selecionado (ou nada), statusSelecionados será ['']. 
+            // Se um ou mais status específicos forem selecionados, será um array desses status.
+            status: (statusSelecionados.length === 1 && statusSelecionados[0] === "") ? null : statusSelecionados.join(","), // Envia como string separada por vírgula
+            agendamentoInicial: document.getElementById("filtroAgInicial").value,
+            agendamentoFinal: document.getElementById("filtroAgFinal").value,
+            responsavel: document.getElementById("filtroResponsavel").value.trim(),
+            prestador: document.getElementById("filtroPrestador").value.trim(),
         };
-        
-        // Remover campos vazios
         Object.keys(filtros).forEach(key => {
             if (filtros[key] === "" || filtros[key] === null) {
                 delete filtros[key];
             }
         });
-        
-        console.log("Aplicando filtros mapeados:", filtros);
         carregarOrdensGerenciamento(filtros);
     });
 }

@@ -69,7 +69,7 @@ router.put("/ordens/:id", async (req, res) => {
   console.log(`[Gerenciamento Route - DEBUG] Recebido req.body para OS ID ${id}:`, JSON.stringify(req.body, null, 2));
   try {
     console.log(`[Gerenciamento Route] Atualizando OS ID: ${id} com dados:`, dadosParaAtualizar);
-    const resultado = await notionService.atualizarOrdemServico(id, dadosParaAtualizar); // Changed to consolidated function
+    const resultado = await notionService.atualizarOrdemGerenciamento(id, dadosParaAtualizar); // Reverted
 
     // Não busca mais no Notion, pega direto do frontend
     const clienteNome = dadosParaAtualizar.clienteNome || 'N/A';

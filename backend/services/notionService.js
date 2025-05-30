@@ -8,7 +8,7 @@ dotenv.config();
 
 // Configuração do Notion
 const notion = new Client({
-  auth: process.env.NOTION_TOKEN, // Atenção: Token hardcoded para exemplo, usar variável de ambiente em produção
+  auth: process.env.NOTION_TOKEN || "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", // Atenção: Token hardcoded para exemplo, usar variável de ambiente em produção
 });
 
 // IDs das bases de dados (idealmente viriam de variáveis de ambiente)
@@ -64,25 +64,6 @@ async function getClientes() {
     });
   } catch (error) {
     console.error("Erro ao buscar clientes:", error);
-    throw error;
-  }
-}
-
-// Adicionada de notionService_isolado.js
-// Adaptada para logging padronizado
-async function adicionarAnexo(ordemId, propriedade, url) {
-  console.log(`[NotionService] Adicionando anexo para OS ID: ${ordemId}, Propriedade: ${propriedade}`);
-  try {
-    const properties = {};
-    // Assume que a URL é externa e válida. A propriedade 'files' espera um array.
-    properties[propriedade] = { files: [{ name: `anexo-${Date.now()}`, external: { url: url } }] };
-    
-    return await notion.pages.update({
-      page_id: ordemId,
-      properties
-    });
-  } catch (error) {
-    console.error(`[NotionService] Erro ao adicionar anexo para OS ID ${ordemId}:`, error.body || error);
     throw error;
   }
 }
@@ -157,36 +138,8 @@ async function getLocaisPorCliente(databaseId = ILC, clienteId) {
   }
 }
 
-// Modificada para incorporar lógica de notionService_isolado.js
 async function getLocaisPorClienteParaEdicao(databaseId = ILC, clienteId) {
-    console.log(`[NotionService] Buscando locais para edição para cliente ${clienteId} na base ${databaseId}`);
-    if (!clienteId) {
-        console.warn("[NotionService] clienteId não fornecido para getLocaisPorClienteParaEdicao");
-        return [];
-    }
-    try {
-        // Reutiliza a lógica de getLocaisPorCliente, mas mantém o log específico e a checagem.
-        const response = await notion.databases.query({
-            database_id: databaseId,
-            filter: {
-                property: "CLIENTE (Global)", 
-                relation: {
-                    contains: clienteId,
-                },
-            },
-        });
-
-        return response.results.map((page) => {
-            // Retorna apenas id e nome como na versão original de _isolado.js para esta função específica
-            return {
-                id: page.id,
-                nome: getTextFromRichText(page.properties.Condomínio?.title) || "Sem nome", 
-            };
-        });
-    } catch (error) {
-        console.error(`[NotionService] Erro ao buscar locais do cliente ${clienteId} (para Edição):`, error.body || error);
-        throw new Error("Erro ao buscar locais do cliente (para Edição)");
-    }
+    return getLocaisPorCliente(databaseId, clienteId); 
 }
 
 
@@ -639,84 +592,43 @@ async function getOrdemDetalhada(ordemId) {
   }
 }
 
-// Consolidada e renomeada. Baseada em atualizarDadosOs de notionService_isolado.js e atualizarOrdemGerenciamento de notionService.js
-// e inputs de atualizarDadosOsDedicada de notionServiceEdicaoOsDedicada.js
-async function atualizarOrdemServico(ordemId, dados) { // Renomeada para atualizarOrdemServico
-  console.log(`[NotionService] Atualizando OS ID: ${ordemId} com dados:`, JSON.stringify(dados, null, 2));
+
+async function atualizarOrdemGerenciamento(ordemId, dadosParaAtualizar) {
+  console.log(`[NotionService] Atualizando OS ID: ${ordemId} com dados:`, dadosParaAtualizar);
+  const propertiesToUpdate = {};
+
+  if (dadosParaAtualizar.status) propertiesToUpdate.Status = { status: { name: dadosParaAtualizar.status } };
+  if (dadosParaAtualizar.agendamentoInicial) propertiesToUpdate["Agendamento Inicial"] = { date: { start: dadosParaAtualizar.agendamentoInicial } };
+  if (dadosParaAtualizar.agendamentoFinal) propertiesToUpdate["Agendamento Final"] = { date: { start: dadosParaAtualizar.agendamentoFinal } };
+  if (dadosParaAtualizar.responsavel) propertiesToUpdate.Responsável = { select: { name: dadosParaAtualizar.responsavel } };
+  if (dadosParaAtualizar.tipoServico) propertiesToUpdate["Tipo de Serviço"] = { select: { name: dadosParaAtualizar.tipoServico } };
+  if (dadosParaAtualizar.servicos) propertiesToUpdate.Execução = { rich_text: [{ text: { content: dadosParaAtualizar.servicos } }] };
+  if (dadosParaAtualizar.observacoes) propertiesToUpdate.Observações = { rich_text: [{ text: { content: dadosParaAtualizar.observacoes } }] };
+  if (dadosParaAtualizar.prestadores) propertiesToUpdate.Equipe = { multi_select: dadosParaAtualizar.prestadores.map(p => ({ name: p })) };
+  if (dadosParaAtualizar.clienteId) propertiesToUpdate.Cliente = { relation: [{ id: dadosParaAtualizar.clienteId }] };
+  if (dadosParaAtualizar.localId) propertiesToUpdate.LOCAL = { relation: [{ id: dadosParaAtualizar.localId }] };
+  if (dadosParaAtualizar.dataInicio) propertiesToUpdate["Inicio de Serviço"] = { date: { start: dadosParaAtualizar.dataInicio } };
+  if (dadosParaAtualizar.dataFim) propertiesToUpdate["Data finalizado"] = { date: { start: dadosParaAtualizar.dataFim } };
+  if (dadosParaAtualizar.realizado) propertiesToUpdate.Realizado = { rich_text: [{ text: { content: dadosParaAtualizar.realizado } }] };
+  if (dadosParaAtualizar.pendencias) propertiesToUpdate.Pendências = { rich_text: [{ text: { content: dadosParaAtualizar.pendencias } }] };
+
+  if (Object.keys(propertiesToUpdate).length === 0) {
+    console.log("[NotionService] Nenhum dado fornecido para atualização em atualizarOrdemGerenciamento.");
+    return { message: "Nenhum dado fornecido para atualização." };
+  }
+
   try {
-    const propertiesToUpdate = {};
-
-    // Datas
-    if (dados.agendamentoInicial !== undefined) {
-      propertiesToUpdate["Agendamento Inicial"] = dados.agendamentoInicial ? { date: { start: dados.agendamentoInicial.split("T")[0] } } : { date: null };
-    }
-    if (dados.agendamentoFinal !== undefined) {
-      propertiesToUpdate["Agendamento Final"] = dados.agendamentoFinal ? { date: { start: dados.agendamentoFinal.split("T")[0] } } : { date: null };
-    }
-    if (dados.dataInicio !== undefined) { // Campo de atualizarOrdemGerenciamento
-        propertiesToUpdate["Inicio de Serviço"] = dados.dataInicio ? { date: { start: dados.dataInicio.split("T")[0] } } : { date: null };
-    }
-    if (dados.dataFim !== undefined) { // Campo de atualizarOrdemGerenciamento
-        propertiesToUpdate["Data finalizado"] = dados.dataFim ? { date: { start: dados.dataFim.split("T")[0] } } : { date: null };
-    }
-
-    // Selects
-    if (dados.responsavel !== undefined) {
-      propertiesToUpdate["Responsável"] = dados.responsavel ? { select: { name: dados.responsavel } } : { select: null };
-    }
-    if (dados.tipoServico !== undefined) { // Nome 'tipoServico' como em _isolado e _dedicada
-      propertiesToUpdate["Tipo de Serviço"] = dados.tipoServico ? { select: { name: dados.tipoServico } } : { select: null };
-    }
-    if (dados.status !== undefined) { // Campo de atualizarOrdemGerenciamento e _dedicada
-        propertiesToUpdate.Status = dados.status ? { status: { name: dados.status } } : { status: null }; // Assumindo que status pode ser limpo com null
-    }
-
-    // Multi-select
-    if (dados.prestadores && Array.isArray(dados.prestadores)) { // Nome 'prestadores' como em _isolado e _dedicada
-      propertiesToUpdate.Equipe = { multi_select: dados.prestadores.map(name => ({ name })) };
-    } else if (dados.prestadores === null) { // Para limpar o campo
-      propertiesToUpdate.Equipe = { multi_select: [] };
-    }
-
-    // Rich Text
-    if (dados.servicos !== undefined) { // Nome 'servicos' como em _isolado e _dedicada (Execução no Notion)
-      propertiesToUpdate.Execução = { rich_text: [{ text: { content: dados.servicos || "" } }] };
-    }
-    if (dados.observacoes !== undefined) {
-      propertiesToUpdate.Observações = { rich_text: [{ text: { content: dados.observacoes || "" } }] };
-    }
-    if (dados.realizado !== undefined) { // Campo de atualizarOrdemGerenciamento
-        propertiesToUpdate.Realizado = { rich_text: [{ text: { content: dados.realizado || "" } }] };
-    }
-    if (dados.pendencias !== undefined) { // Campo de atualizarOrdemGerenciamento
-        propertiesToUpdate.Pendências = { rich_text: [{ text: { content: dados.pendencias || "" } }] };
-    }
-    
-    // Relations
-    // Mantendo a lógica original de atualizarOrdemGerenciamento para Cliente e Local, se fornecidos.
-    if (dados.clienteId) {
-        propertiesToUpdate.Cliente = { relation: [{ id: dados.clienteId }] };
-    }
-    if (dados.localId !== undefined) { // 'localId' como em _isolado
-      propertiesToUpdate.LOCAL = dados.localId ? { relation: [{ id: dados.localId }] } : { relation: [] }; // Limpar relação se localId for null
-    }
-
-    if (Object.keys(propertiesToUpdate).length === 0) {
-      console.log("[NotionService] Nenhum dado fornecido para atualização em atualizarOrdemServico.");
-      return { message: "Nenhuma alteração necessária." };
-    }
-
-    const response = await notion.pages.update({
+    const updatedPage = await notion.pages.update({
       page_id: ordemId,
       properties: propertiesToUpdate,
     });
-    console.log(`[NotionService] OS ${ordemId} atualizada com sucesso (atualizarOrdemServico).`);
-    return response;
+    console.log(`[NotionService] OS ${ordemId} atualizada com sucesso.`);
+    return updatedPage;
   } catch (error) {
-    console.error(`[NotionService] Erro ao atualizar OS ${ordemId} (atualizarOrdemServico):`, error.body || error.message);
+    console.error(`[NotionService] Erro ao atualizar OS ${ordemId}:`, error.body || error.message);
     const serviceError = new Error(error.message || "Erro interno ao atualizar OS no Notion.");
-    serviceError.statusCode = error.code || 500; // Mapeia para um código de status HTTP, se disponível
-    serviceError.body = error.body; // Adiciona o corpo do erro do Notion para depuração
+    serviceError.statusCode = error.code || 500;
+    serviceError.body = error.body;
     throw serviceError;
   }
 }
@@ -789,50 +701,60 @@ module.exports = {
   getOrdem,
   getOrdensGerenciamento,
   getOrdemDetalhada,
-  // atualizarOrdemGerenciamento, // Comentado pois foi substituído por atualizarOrdemServico
-  atualizarOrdemServico, // Nova função consolidada
+  atualizarOrdemGerenciamento,
   getArquivosServico,
-  getOrdensProgramacao, // Exporta a função para Programação
-  criarOrdemReaberta, // Adicionada de notionService_isolado.js
-  adicionarAnexo // Adicionada de notionService_isolado.js
+  getOrdensProgramacao // Exporta a função para Programação
 };
 
-// Adicionada de notionService_isolado.js
-// Adaptada para usar IDOS_RELATORIO e logging padronizado
-async function criarOrdemReaberta(dadosNovaOS) {
-  const {
-    clienteId, historicoOS, localId, agendamentoInicial, agendamentoFinal,
-    prestadores, servicos, observacoes, tipoServico, responsavel
-  } = dadosNovaOS;
-  console.log("[NotionService] Criando ordem REABERTA:", JSON.stringify(dadosNovaOS, null, 2));
-  const dateInicialForNotion = agendamentoInicial ? agendamentoInicial.split("T")[0] : null;
-  const dateFinalForNotion = agendamentoFinal ? agendamentoFinal.split("T")[0] : null;
-  const equipeSelecionada = Array.isArray(prestadores) ? prestadores.map(name => ({ name })) : (prestadores ? [{ name: prestadores }] : []);
-  const dataSolicitacaoFormatada = new Date().toISOString().split("T")[0];
-  const properties = {
-    "Data da Solicitação": { date: { start: dataSolicitacaoFormatada } },
-    Cliente: { relation: [{ id: clienteId }] },
-    "Agendamento Inicial": dateInicialForNotion ? { date: { start: dateInicialForNotion } } : undefined,
-    "Agendamento Final": dateFinalForNotion ? { date: { start: dateFinalForNotion } } : undefined,
-    Equipe: { multi_select: equipeSelecionada },
-    Execução: { rich_text: [{ text: { content: servicos || "" } }] },
-    "Tipo de Serviço": tipoServico ? { select: { name: tipoServico } } : undefined,
-    Status: { status: { name: "Não iniciada" } },
-    Observações: observacoes ? { rich_text: [{ text: { content: observacoes } }] } : undefined,
-    "OS Original (Reaberta)": historicoOS ? { rich_text: [{ text: { content: String(historicoOS) } }] } : undefined,
-  };
-  if (localId) properties.LOCAL = { relation: [{ id: localId }] }; // Alterado de 'Local' para 'LOCAL' para consistência com criarOrdemServico
-  if (responsavel && responsavel.trim() !== "") properties["Responsável"] = { select: { name: responsavel } };
-  else properties["Responsável"] = { select: null }; // Garante que o campo seja limpo se não houver responsável
-  
-  console.log("[NotionService] Propriedades para REABERTURA:", JSON.stringify(properties, null, 2));
+
+
+async function concatenarServicoRealizado(osId, servicoData) {
+  console.log(`[NotionService] Concatenando serviço para OS ID: ${osId}`);
   try {
-    const notionResponse = await notion.pages.create({ parent: { database_id: IDOS_RELATORIO }, properties }); // Usa IDOS_RELATORIO
-    console.log("[NotionService] Ordem REABERTA criada com sucesso:", notionResponse.id);
-    return notionResponse;
+    // 1. Ler o conteúdo atual da página para obter o campo "Realizado"
+    const page = await notion.pages.retrieve({ page_id: osId });
+    const currentRealizadoRichText = page.properties.Realizado?.rich_text || [];
+
+    // 2. Formatar o novo texto do serviço
+    let novoServicoTexto = `--- SERVIÇO EXECUTADO ---\n`;
+    novoServicoTexto += `Descrição: ${servicoData.descricao}\n`;
+    novoServicoTexto += `Técnico(s): ${servicoData.tecnicos.join(", ")}\n`;
+    novoServicoTexto += `Status: ${servicoData.status}\n`;
+    if (servicoData.observacao && servicoData.observacao.trim() !== "") {
+      novoServicoTexto += `Observação: ${servicoData.observacao}\n`;
+    }
+    novoServicoTexto += `-------------------------\n\n`; // Adiciona duas quebras de linha para separar entradas
+
+    // 3. Criar o novo objeto rich_text para o serviço
+    const novoRichTextObject = {
+      type: "text",
+      text: {
+        content: novoServicoTexto,
+      },
+    };
+
+    // 4. Adicionar o novo texto ao array existente
+    const updatedRichTextArray = [...currentRealizadoRichText, novoRichTextObject];
+    
+    // 5. Atualizar a página do Notion com o campo "Realizado" modificado
+    await notion.pages.update({
+      page_id: osId,
+      properties: {
+        Realizado: {
+          rich_text: updatedRichTextArray,
+        },
+      },
+    });
+
+    console.log(`[NotionService] Campo 'Realizado' atualizado para OS ID: ${osId}`);
+    return getTextFromRichText(updatedRichTextArray);
+
   } catch (error) {
-    console.error("[NotionService] Erro ao criar ordem REABERTA:", error.body || error);
-    throw error;
+    console.error(`[NotionService] Erro ao concatenar serviço no Notion para OS ID ${osId}:`, error.body || error);
+    const enhancedError = new Error(error.message || "Erro ao atualizar Notion.");
+    enhancedError.statusCode = error.code || 500;
+    enhancedError.body = error.body;
+    throw enhancedError;
   }
 }
 

@@ -3,7 +3,7 @@
 
 const express = require("express");
 const router = express.Router();
-const notionService = require("../services/notionService"); // Consolidated service
+const notionService = require("../services/notionService_isolado.js"); // Reverted
 // const firebaseService = require("../services/firebaseService"); // Descomentar se necessário
 
 /**
@@ -67,7 +67,7 @@ router.put("/ordens/:id", async (req, res) => {
   const dadosParaAtualizar = req.body;
   try {
     console.log(`[Gerenciamento Route] Atualizando OS ID: ${id} com dados:`, dadosParaAtualizar);
-    const resultado = await notionService.atualizarOrdemServico(id, dadosParaAtualizar); // Changed to consolidated function
+    const resultado = await notionService.atualizarDadosOs(id, dadosParaAtualizar); // Reverted
     res.json({ message: "Ordem de Serviço atualizada com sucesso!", details: resultado });
   } catch (error) {
     console.error(`[Gerenciamento Route] Erro ao atualizar OS ${id}:`, error);

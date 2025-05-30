@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const notionService = require("../services/notionService"); // Consolidated service
+const notionServiceEdicaoOsDedicada = require("../services/notionServiceEdicaoOsDedicada"); // Reverted
 const firebaseService = require("../services/firebaseService");
 
 // Rota para ATUALIZAR uma Ordem de Serviço (PUT)
@@ -14,7 +14,7 @@ router.put("/ordens/:id", async (req, res) => {
 
     try {
         // Lógica para atualizar no Notion
-        const resultadoNotion = await notionService.atualizarOrdemServico(id, notionData); // Changed to consolidated function
+        const resultadoNotion = await notionServiceEdicaoOsDedicada.atualizarDadosOsDedicada(id, notionData); // Reverted
         
         // Mapeamento do payload do frontend (firebaseData) para o formato esperado pelo firebaseService.atualizarOrdemGerenciamentoFirebase
         const payloadFirebaseFormatado = {
@@ -60,12 +60,12 @@ router.put("/ordens/:id", async (req, res) => {
 
 // Rota para BUSCAR detalhes de uma Ordem de Serviço para edição (GET)
 // Esta rota não foi alterada, pois o carregamento deve usar a rota original, conforme instrução.
-// No entanto, a rota dedicada de GET ainda existe e usa o notionService.
+// No entanto, a rota dedicada de GET ainda existe e usa o notionServiceEdicaoOsDedicada.
 // Se o frontend foi ajustado para usar a rota original de carregamento, esta rota GET dedicada pode não estar sendo usada ativamente pelo editar_os_isolado.html.
 router.get("/ordens/:id", async (req, res) => {
     const { id } = req.params;
     try {
-        const osDetalhes = await notionService.getOrdemDetalhada(id); // Changed to consolidated function
+        const osDetalhes = await notionServiceEdicaoOsDedicada.getOrdemDetalhadaDedicada(id); // Reverted
         if (osDetalhes) {
             res.status(200).json(osDetalhes);
         } else {

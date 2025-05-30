@@ -5,6 +5,11 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 
+if (!process.env.NOTION_TOKEN) {
+  console.error("CRITICAL ERROR: NOTION_TOKEN environment variable is not set. Application cannot connect to Notion.");
+  throw new Error("NOTION_TOKEN is not configured.");
+}
+
 // Configuracao do Notion (isolada para este servico)
 const notion = new Client({
   auth: process.env.NOTION_TOKEN || "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", // Usar a mesma forma de obter o token

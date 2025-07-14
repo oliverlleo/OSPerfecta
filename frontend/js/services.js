@@ -1,22 +1,12 @@
 // services.js
-// Camada de serviço para interação com o backend.
-// Todas as chamadas para a API são centralizadas aqui.
+// Camada de serviço para interação com o backend
 
-// =================================================
-//              CONSTANTES
-// =================================================
-
-// ID da base de dados de Locais no Notion.
+// Constante para o ID da base de dados de Locais
 const ILC = "1d8d9246083e80128f65f99939f3593d";
 
-
-// =================================================
-//              CLIENTES E LOCAIS
-// =================================================
-
 /**
- * Busca todos os clientes do banco de dados.
- * @returns {Promise<Array>} Lista de clientes.
+ * Busca todos os clientes do banco de dados
+ * @returns {Promise<Array>} Lista de clientes
  */
 async function getClientes() {
   try {
@@ -33,8 +23,8 @@ async function getClientes() {
 }
 
 /**
- * Busca todos os locais do banco de dados.
- * @returns {Promise<Array>} Lista de locais.
+ * Busca todos os locais do banco de dados
+ * @returns {Promise<Array>} Lista de locais
  */
 async function getLocais() {
   try {
@@ -51,9 +41,9 @@ async function getLocais() {
 }
 
 /**
- * Busca locais relacionados a um cliente específico.
- * @param {string} clienteId - ID do cliente.
- * @returns {Promise<Array>} Lista de locais filtrados.
+ * Busca locais relacionados a um cliente específico
+ * @param {string} clienteId - ID do cliente
+ * @returns {Promise<Array>} Lista de locais filtrados
  */
 async function getLocaisPorCliente(clienteId) {
   try {
@@ -70,9 +60,9 @@ async function getLocaisPorCliente(clienteId) {
 }
 
 /**
- * Busca o endereço de um local específico.
- * @param {string} localId - ID do local.
- * @returns {Promise<string>} Endereço do local.
+ * Busca o endereço de um local específico
+ * @param {string} localId - ID do local
+ * @returns {Promise<string>} Endereço do local
  */
 async function getEnderecoLocal(localId) {
   try {
@@ -90,9 +80,9 @@ async function getEnderecoLocal(localId) {
 }
 
 /**
- * Busca a cidade de um local específico.
- * @param {string} localId - ID do local.
- * @returns {Promise<string>} Cidade do local.
+ * Busca a cidade de um local específico
+ * @param {string} localId - ID do local
+ * @returns {Promise<string>} Cidade do local
  */
 async function getCidadeLocal(localId) {
   try {
@@ -110,9 +100,9 @@ async function getCidadeLocal(localId) {
 }
 
 /**
- * Busca o endereço de um cliente específico.
- * @param {string} clienteId - ID do cliente.
- * @returns {Promise<string>} Endereço do cliente.
+ * Busca o endereço de um cliente específico
+ * @param {string} clienteId - ID do cliente
+ * @returns {Promise<string>} Endereço do cliente
  */
 async function getEndereco(clienteId) {
   try {
@@ -130,9 +120,9 @@ async function getEndereco(clienteId) {
 }
 
 /**
- * Busca a cidade de um cliente específico.
- * @param {string} clienteId - ID do cliente.
- * @returns {Promise<string>} Cidade do cliente.
+ * Busca a cidade de um cliente específico
+ * @param {string} clienteId - ID do cliente
+ * @returns {Promise<string>} Cidade do cliente
  */
 async function getCidade(clienteId) {
   try {
@@ -149,14 +139,9 @@ async function getCidade(clienteId) {
   }
 }
 
-
-// =================================================
-//              ORDEM DE SERVIÇO (GERAL)
-// =================================================
-
 /**
- * Busca as opções de equipe disponíveis.
- * @returns {Promise<Array>} Lista de opções de equipe.
+ * Busca as opções de equipe disponíveis
+ * @returns {Promise<Array>} Lista de opções de equipe
  */
 async function getEquipe() {
   try {
@@ -173,8 +158,8 @@ async function getEquipe() {
 }
 
 /**
- * Busca as opções de responsáveis disponíveis.
- * @returns {Promise<Array>} Lista de opções de responsáveis.
+ * Busca as opções de responsáveis disponíveis
+ * @returns {Promise<Array>} Lista de opções de responsáveis
  */
 async function getResponsaveis() {
   try {
@@ -191,21 +176,28 @@ async function getResponsaveis() {
 }
 
 /**
- * Cria uma nova ordem de serviço.
- * @param {Object} dados - Dados da ordem de serviço.
- * @returns {Promise<Object>} Resposta da criação.
+ * Cria uma nova ordem de serviço
+ * @param {Object} dados - Dados da ordem de serviço
+ * @returns {Promise<Object>} Resposta da criação
  */
 async function criarOrdemServico(dados) {
   try {
+    console.log("Enviando dados para criar ordem de serviço:", dados);
+    
     const response = await fetch(`${API_URL}/ordem-servico`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify(dados)
     });
+    
     if (!response.ok) {
       const errorData = await response.json();
+      console.error("Resposta de erro do servidor:", errorData);
       throw new Error(errorData.message || "Erro ao criar ordem de serviço");
     }
+    
     return await response.json();
   } catch (error) {
     console.error("Erro ao criar ordem de serviço:", error);
@@ -215,8 +207,8 @@ async function criarOrdemServico(dados) {
 }
 
 /**
- * Busca todas as ordens de serviço.
- * @returns {Promise<Array>} Lista de ordens de serviço.
+ * Busca todas as ordens de serviço
+ * @returns {Promise<Array>} Lista de ordens de serviço
  */
 async function getOrdens() {
   try {
@@ -233,20 +225,24 @@ async function getOrdens() {
 }
 
 /**
- * Cria um slug para uma ordem de serviço.
- * @param {string} ordemId - ID da ordem de serviço.
- * @returns {Promise<Object>} Resposta com o slug.
+ * Cria um slug para uma ordem de serviço
+ * @param {string} ordemId - ID da ordem de serviço
+ * @returns {Promise<Object>} Resposta com o slug
  */
 async function criarSlug(ordemId) {
   try {
     const response = await fetch(`${API_URL}/ordem-servico/slug`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({ ordemId })
     });
+    
     if (!response.ok) {
       throw new Error("Erro ao criar link");
     }
+    
     return await response.json();
   } catch (error) {
     console.error("Erro ao criar link:", error);
@@ -256,9 +252,9 @@ async function criarSlug(ordemId) {
 }
 
 /**
- * Busca uma ordem de serviço pelo slug.
- * @param {string} slug - Slug da ordem de serviço.
- * @returns {Promise<Object>} Dados da ordem de serviço.
+ * Busca uma ordem de serviço pelo slug
+ * @param {string} slug - Slug da ordem de serviço
+ * @returns {Promise<Object>} Dados da ordem de serviço
  */
 async function getOrdemPorSlug(slug) {
   try {
@@ -276,22 +272,27 @@ async function getOrdemPorSlug(slug) {
 }
 
 /**
- * Atualiza o status de uma ordem de serviço (usado para Iniciar Serviço, Finalizar OS, etc.).
- * @param {string} ordemId - ID da ordem de serviço.
- * @param {Object} dados - Dados para atualização (ex: { status: "Em andamento", dataInicio: new Date().toISOString() }).
- * @returns {Promise<Object>} Resposta da atualização.
+ * Atualiza o status de uma ordem de serviço (usado para Iniciar Serviço, Finalizar OS, etc.)
+ * @param {string} ordemId - ID da ordem de serviço
+ * @param {Object} dados - Dados para atualização (ex: { status: "Em andamento", dataInicio: new Date().toISOString() })
+ * @returns {Promise<Object>} Resposta da atualização
  */
 async function atualizarStatusOrdem(ordemId, dados) {
   try {
+    // Corrigido para usar o endpoint /status em vez de /status-finalizar
     const response = await fetch(`${API_URL}/ordem-servico/${ordemId}/status`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: "POST", 
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify(dados)
     });
+    
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: "Erro desconhecido ao atualizar status da OS." }));
+      const errorData = await response.json().catch(() => ({ message: "Erro desconhecido ao atualizar status da OS."}));
       throw new Error(errorData.message || "Erro ao atualizar status da OS");
     }
+    
     return await response.json();
   } catch (error) {
     console.error("Erro ao atualizar status da OS:", error);
@@ -306,9 +307,10 @@ async function atualizarStatusOrdem(ordemId, dados) {
  * @returns {Promise<Object>} Resposta da API.
  */
 async function iniciarServicoOS(ordemId) {
+  // Chama a função genérica de atualização de status
   return atualizarStatusOrdem(ordemId, {
     status: "Em andamento",
-    dataInicio: new Date().toISOString()
+    dataInicio: new Date().toISOString() // Garante que a data e hora atuais sejam enviadas
   });
 }
 
@@ -324,20 +326,22 @@ async function finalizarOS(ordemId, statusFinal, informacoesAdicionais, servicos
   const dados = {
     status: statusFinal,
     dataFim: new Date().toISOString(),
-    servicosIndividuais: servicosExecutados
+    servicosIndividuais: servicosExecutados 
   };
   if (statusFinal === "Concluído") {
     dados.realizado = informacoesAdicionais || "Serviços concluídos conforme descrito individualmente.";
   } else if (statusFinal === "Gerou Pendências") {
     dados.pendencias = informacoesAdicionais || "Pendências geradas conforme descrito individualmente.";
   }
+  // Chama a função genérica de atualização de status
   return atualizarStatusOrdem(ordemId, dados);
 }
 
+
 /**
- * Busca ordens de serviço para uma data específica.
- * @param {string} data - Data no formato YYYY-MM-DD.
- * @returns {Promise<Array>} Lista de ordens de serviço.
+ * Busca ordens de serviço para uma data específica
+ * @param {string} data - Data no formato YYYY-MM-DD
+ * @returns {Promise<Array>} Lista de ordens de serviço
  */
 async function getOrdensPorData(data) {
   try {
@@ -353,10 +357,11 @@ async function getOrdensPorData(data) {
   }
 }
 
+
 /**
- * Busca uma ordem de serviço pelo ID, incluindo os serviços executados.
- * @param {string} id - ID da ordem de serviço.
- * @returns {Promise<Object>} Dados da ordem de serviço.
+ * Busca uma ordem de serviço pelo ID. Esta função agora também busca os serviços_executados.
+ * @param {string} id - ID da ordem de serviço
+ * @returns {Promise<Object>} Dados da ordem de serviço, incluindo servicos_executados
  */
 async function getOrdemPorId(id) {
   try {
@@ -369,13 +374,14 @@ async function getOrdemPorId(id) {
         throw new Error(`Erro ao buscar ordem por ID: ${response.status} ${errorText}`);
       }
     }
-    return await response.json();
+    return await response.json(); 
   } catch (error) {
     console.error("Erro ao buscar ordem por ID:", error);
     mostrarMensagem(error.message || "Erro ao buscar ordem por ID. Tente novamente.", "erro");
     throw error;
   }
 }
+
 
 /**
  * Busca os arquivos da propriedade "Arquivos Serviço" para uma ordem específica.
@@ -385,20 +391,23 @@ async function getOrdemPorId(id) {
 async function getArquivosServicoPorOrdemId(ordemId) {
   try {
     const response = await fetch(`${API_URL}/ordem-servico/${ordemId}/arquivos-servico`);
+    
     if (!response.ok) {
       if (response.status === 404) {
         console.warn(`Nenhum arquivo encontrado ou propriedade "Arquivos Serviço" ausente para OS ID: ${ordemId}`);
-        return [];
+        return []; 
       } else {
         const errorData = await response.json().catch(() => ({ message: "Erro desconhecido ao buscar arquivos." }));
         throw new Error(errorData.message || `Erro ${response.status} ao buscar arquivos de serviço`);
       }
     }
+    
     const data = await response.json();
-    return data || [];
+    return data || []; 
+
   } catch (error) {
     console.error(`Erro ao buscar arquivos de serviço para OS ID ${ordemId}:`, error);
-    return [];
+    return []; 
   }
 }
 
@@ -412,14 +421,17 @@ async function salvarServicoIndividual(osId, servicoData) {
   try {
     const response = await fetch(`${API_URL}/ordem-servico/${osId}/servico`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify(servicoData)
     });
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ message: "Erro desconhecido ao salvar serviço individual." }));
       throw new Error(errorData.message || `Erro ${response.status} ao salvar serviço individual`);
     }
-    return await response.json();
+    return await response.json(); 
   } catch (error) {
     console.error(`Erro ao salvar serviço individual para OS ID ${osId}:`, error);
     mostrarMensagem(error.message || "Erro ao salvar serviço individual. Tente novamente.", "erro");
@@ -427,44 +439,18 @@ async function salvarServicoIndividual(osId, servicoData) {
   }
 }
 
-/**
- * Busca dados do campo "Realizado" do Notion.
- * @param {string} osId - ID da Ordem de Serviço.
- * @returns {Promise<string>} Conteúdo do campo "Realizado".
- */
-async function getCampoRealizadoNotion(osId) {
-  try {
-    const response = await fetch(`${API_URL}/ordem-servico/${osId}/campo-realizado`);
-    if (!response.ok) {
-      if (response.status === 404) {
-        console.warn(`Campo "Realizado" não encontrado ou vazio para OS ID: ${osId}`);
-        return null;
-      }
-      const errorData = await response.json().catch(() => ({ message: "Erro desconhecido ao buscar campo \"Realizado\"." }));
-      throw new Error(errorData.message || `Erro ${response.status} ao buscar campo \"Realizado\"`);
-    }
-    const data = await response.json();
-    return data.realizadoTexto;
-  } catch (error) {
-    console.error(`Erro ao buscar campo "Realizado" para OS ID ${osId}:`, error);
-    throw error;
-  }
-}
 
-
-// =================================================
-//              MÓDULO DE GERENCIAMENTO
-// =================================================
+// --- Funções para o Módulo de Gerenciamento de O.S. ---
 
 /**
  * Busca ordens de serviço para a tela de gerenciamento, com filtros.
- * @param {Object} filtros - Objeto contendo os filtros a serem aplicados.
+ * @param {Object} filtros - Objeto contendo os filtros a serem aplicados (ex: { status: "Pendente", cliente: "Nome Cliente" }).
  * @returns {Promise<Array>} Lista de ordens de serviço filtradas.
  */
 async function getOrdensGerenciamento(filtros = {}) {
   try {
     const queryParams = new URLSearchParams(filtros).toString();
-    const response = await fetch(`${API_URL}/api/gerenciamento/ordens?${queryParams}`);
+    const response = await fetch(`${API_URL}/api/gerenciamento/ordens?${queryParams}`); 
     if (!response.ok) {
       throw new Error("Erro ao buscar ordens para gerenciamento");
     }
@@ -482,9 +468,9 @@ async function getOrdensGerenciamento(filtros = {}) {
  */
 async function getOrdemDetalhada(ordemId) {
   try {
-    const response = await fetch(`${API_URL}/api/gerenciamento/ordens/${ordemId}`);
+    const response = await fetch(`${API_URL}/api/gerenciamento/ordens/${ordemId}`); 
     if (!response.ok) {
-      if (response.status === 404) {
+       if (response.status === 404) {
         throw new Error("Ordem não encontrada para este ID");
       } else {
         throw new Error("Erro ao buscar detalhes da ordem");
@@ -493,7 +479,7 @@ async function getOrdemDetalhada(ordemId) {
     return await response.json();
   } catch (error) {
     console.error("Erro em getOrdemDetalhada:", error);
-    throw error;
+    throw error; 
   }
 }
 
@@ -505,9 +491,11 @@ async function getOrdemDetalhada(ordemId) {
  */
 async function atualizarOrdem(ordemId, dadosParaAtualizar) {
   try {
-    const response = await fetch(`${API_URL}/api/gerenciamento/ordens/${ordemId}`, {
+    const response = await fetch(`${API_URL}/api/gerenciamento/ordens/${ordemId}`, { 
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify(dadosParaAtualizar)
     });
     if (!response.ok) {
@@ -523,14 +511,16 @@ async function atualizarOrdem(ordemId, dadosParaAtualizar) {
 
 /**
  * Cria uma nova ordem de serviço marcada como reaberta, vinculada a uma original.
- * @param {Object} dadosNovaOs - Dados da nova ordem de serviço.
+ * @param {Object} dadosNovaOs - Dados da nova ordem de serviço, incluindo o ID ou número da OS original no campo "historico".
  * @returns {Promise<Object>} Resposta da criação da nova ordem.
  */
 async function criarOrdemReaberta(dadosNovaOs) {
   try {
-    const response = await fetch(`${API_URL}/api/gerenciamento/ordens/reabrir`, {
+    const response = await fetch(`${API_URL}/api/gerenciamento/ordens/reabrir`, { 
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify(dadosNovaOs)
     });
     if (!response.ok) {
@@ -545,9 +535,35 @@ async function criarOrdemReaberta(dadosNovaOs) {
 }
 
 
-// =================================================
-//              MÓDULO ISOLADO (Edição/Reabertura v2)
-// =================================================
+
+// Nova função para buscar dados do campo "Realizado" do Notion
+async function getCampoRealizadoNotion(osId) {
+  try {
+    const response = await fetch(`${API_URL}/ordem-servico/${osId}/campo-realizado`);
+    if (!response.ok) {
+      if (response.status === 404) {
+        console.warn(`Campo "Realizado" não encontrado ou vazio para OS ID: ${osId}`);
+        return null; // Retornar null para indicar que o campo pode não existir ou estar vazio
+      }
+      const errorData = await response.json().catch(() => ({ message: "Erro desconhecido ao buscar campo \"Realizado\"." }));
+      throw new Error(errorData.message || `Erro ${response.status} ao buscar campo \"Realizado\"`);
+    }
+    const data = await response.json();
+    // Assumindo que o backend retorna um objeto com uma propriedade contendo o texto, ex: { realizadoTexto: "..." }
+    // Ou diretamente o texto se o endpoint for específico para isso.
+    // Por agora, vamos assumir que retorna { realizadoTexto: "conteudo do campo" }
+    return data.realizadoTexto; 
+  } catch (error) {
+    console.error(`Erro ao buscar campo "Realizado" para OS ID ${osId}:`, error);
+    // Não vamos mostrar mensagem de erro pop-up aqui, a função chamadora decidirá
+    // mostrarMensagem(error.message || "Erro ao buscar dados do relatório do Notion. Tente novamente.", "erro");
+    throw error; // Propagar o erro para a função chamadora lidar
+  }
+}
+
+
+
+// --- Funções Isoladas para Edição/Reabertura de O.S. (v2) ---
 
 /**
  * Busca os dados detalhados de uma ordem de serviço específica pelo ID (versão isolada).
@@ -556,18 +572,19 @@ async function criarOrdemReaberta(dadosNovaOs) {
  */
 async function getOrdemDetalhada_isolado(ordemId) {
   try {
-    const response = await fetch(`${API_URL}/api/gerenciamento_isolado/ordens/${ordemId}`);
+    const response = await fetch(`${API_URL}/api/gerenciamento_isolado/ordens/${ordemId}`); // Rota isolada
     if (!response.ok) {
-      if (response.status === 404) {
+       if (response.status === 404) {
         throw new Error("Ordem não encontrada para este ID (isolado)");
       } else {
-        const errorText = await response.text();
+        const errorText = await response.text(); // Ler o corpo do erro
         throw new Error(`Erro ao buscar detalhes da ordem (isolado): ${response.status} ${errorText}`);
       }
     }
     return await response.json();
   } catch (error) {
     console.error('Erro em getOrdemDetalhada_isolado:', error);
+    // mostrarMensagem(error.message || 'Erro ao buscar detalhes da ordem (isolado).', 'erro');
     throw error;
   }
 }
@@ -580,9 +597,11 @@ async function getOrdemDetalhada_isolado(ordemId) {
  */
 async function atualizarOrdem_isolado(ordemId, dadosParaAtualizar) {
   try {
-    const response = await fetch(`${API_URL}/api/gerenciamento_isolado/ordens/${ordemId}`, {
+    const response = await fetch(`${API_URL}/api/gerenciamento_isolado/ordens/${ordemId}`, { // Rota isolada
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify(dadosParaAtualizar)
     });
     if (!response.ok) {
@@ -592,6 +611,7 @@ async function atualizarOrdem_isolado(ordemId, dadosParaAtualizar) {
     return await response.json();
   } catch (error) {
     console.error('Erro em atualizarOrdem_isolado:', error);
+    // mostrarMensagem(error.message || 'Erro ao atualizar ordem de serviço (isolado).', 'erro');
     throw error;
   }
 }
@@ -603,9 +623,11 @@ async function atualizarOrdem_isolado(ordemId, dadosParaAtualizar) {
  */
 async function criarOrdemReaberta_isolado(dadosNovaOs) {
   try {
-    const response = await fetch(`${API_URL}/api/gerenciamento_isolado/ordens/reabrir`, {
+    const response = await fetch(`${API_URL}/api/gerenciamento_isolado/ordens/reabrir`, { // Rota isolada
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify(dadosNovaOs)
     });
     if (!response.ok) {
@@ -615,6 +637,8 @@ async function criarOrdemReaberta_isolado(dadosNovaOs) {
     return await response.json();
   } catch (error) {
     console.error('Erro em criarOrdemReaberta_isolado:', error);
+    // mostrarMensagem(error.message || 'Erro ao reabrir ordem de serviço (isolado).', 'erro');
     throw error;
   }
 }
+

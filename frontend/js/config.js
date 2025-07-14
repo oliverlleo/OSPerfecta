@@ -1,20 +1,15 @@
-// config.js (Corrigido e Simplificado para Cloudflare)
+// config.js
+// Configurações e constantes do sistema
 
-// =================================================
-//              CONFIGURAÇÕES PRINCIPAIS
-// =================================================
+const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+    ? 'http://localhost:3000' 
+    : '';
 
-// --- CORREÇÃO FINAL ---
-// A URL da API agora está definida diretamente para o seu backend na Cloudflare.
-// Toda a lógica que verificava "localhost" foi removida para evitar confusão.
-const API_URL = "https://osperfecta-backend.perfectaesquadriaspvc.workers.dev";
-
-
-// IDs dos bancos de dados do Notion.
+// IDs dos bancos de dados do Notion
 const NOTION_IDC = '1ced9246083e80ba9305efcf0a0b83d0';
 const NOTION_IDOS = '1dfd9246083e803b9abdd3366e47e523';
 
-// Configuração do Firebase para o SDK do cliente.
+// Configuração do Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDfzyQFMSDDWVoX-HUPVLy3vwi2dgAioZ4",
   authDomain: "os---perfecta.firebaseapp.com",
@@ -25,59 +20,55 @@ const firebaseConfig = {
   measurementId: "G-6GFJST9FPJ"
 };
 
-
-// =================================================
-//              FUNÇÕES UTILITÁRIAS
-// =================================================
-
-/**
- * Formata uma string de data para o padrão brasileiro (DD/MM/YYYY).
- * @param {string} dataString - A data em formato de string.
- * @returns {string} A data formatada.
- */
+// Formatadores
 const formatarData = (dataString) => {
   if (!dataString) return '';
+  
+  // Corrigindo problema de fuso horário
+  // Adicionando 'T00:00:00' para garantir que a data seja interpretada no fuso horário local
+  // e não seja afetada pela conversão UTC
   const dataAjustada = dataString.includes('T') ? dataString : `${dataString}T12:00:00`;
+  
+  // Criando objeto Date e garantindo que use o fuso horário local
   const data = new Date(dataAjustada);
+  
+  // Formatando para o padrão brasileiro (DD/MM/YYYY)
   return data.toLocaleDateString('pt-BR');
 };
 
-/**
- * Formata uma string de data e hora para o padrão brasileiro.
- * @param {string} dataString - A data e hora em formato de string.
- * @returns {string} A data e hora formatadas.
- */
 const formatarDataHora = (dataString) => {
   if (!dataString) return '';
+  
   const data = new Date(dataString);
   return data.toLocaleDateString('pt-BR') + ' ' + data.toLocaleTimeString('pt-BR');
 };
 
-/**
- * Exibe uma mensagem flutuante na tela.
- * @param {string} mensagem - O texto a ser exibido.
- * @param {string} [tipo='info'] - O tipo da mensagem ('info', 'sucesso', 'erro').
- */
+// Funções de utilidade
 const mostrarMensagem = (mensagem, tipo = 'info') => {
+  // Verificar se já existe um elemento de mensagem
   let mensagemElement = document.getElementById('mensagem-sistema');
+  
   if (!mensagemElement) {
+    // Criar elemento de mensagem
     mensagemElement = document.createElement('div');
     mensagemElement.id = 'mensagem-sistema';
     document.body.appendChild(mensagemElement);
   }
+  
+  // Definir classe baseada no tipo
   mensagemElement.className = `mensagem mensagem-${tipo}`;
   mensagemElement.textContent = mensagem;
+  
+  // Mostrar mensagem
   mensagemElement.style.display = 'block';
+  
+  // Esconder após 5 segundos
   setTimeout(() => {
     mensagemElement.style.display = 'none';
   }, 5000);
 };
 
-/**
- * Obtém um parâmetro da URL da página atual.
- * @param {string} nome - O nome do parâmetro.
- * @returns {string|null} O valor do parâmetro ou null se não existir.
- */
+// Função para obter parâmetros da URL
 const obterParametroUrl = (nome) => {
   const urlParams = new URLSearchParams(window.location.search);
   return urlParams.get(nome);

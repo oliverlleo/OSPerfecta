@@ -356,4 +356,265 @@ async function getOrdensPorData(data) {
 /**
  * Busca uma ordem de serviço pelo ID, incluindo os serviços executados.
  * @param {string} id - ID da ordem de serviço.
- * @returns {Promise<Object>} Dados da ordem de servi
+ * @returns {Promise<Object>} Dados da ordem de serviço.
+ */
+async function getOrdemPorId(id) {
+  try {
+    const response = await fetch(`${API_URL}/ordem-servico/${id}`);
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error("Ordem não encontrada para este ID");
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Erro ao buscar ordem por ID: ${response.status} ${errorText}`);
+      }
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Erro ao buscar ordem por ID:", error);
+    mostrarMensagem(error.message || "Erro ao buscar ordem por ID. Tente novamente.", "erro");
+    throw error;
+  }
+}
+
+/**
+ * Busca os arquivos da propriedade "Arquivos Serviço" para uma ordem específica.
+ * @param {string} ordemId - ID da ordem de serviço (página do Notion).
+ * @returns {Promise<Array>} Lista de objetos de arquivo { name: string, url: string }.
+ */
+async function getArquivosServicoPorOrdemId(ordemId) {
+  try {
+    const response = await fetch(`${API_URL}/ordem-servico/${ordemId}/arquivos-servico`);
+    if (!response.ok) {
+      if (response.status === 404) {
+        console.warn(`Nenhum arquivo encontrado ou propriedade "Arquivos Serviço" ausente para OS ID: ${ordemId}`);
+        return [];
+      } else {
+        const errorData = await response.json().catch(() => ({ message: "Erro desconhecido ao buscar arquivos." }));
+        throw new Error(errorData.message || `Erro ${response.status} ao buscar arquivos de serviço`);
+      }
+    }
+    const data = await response.json();
+    return data || [];
+  } catch (error) {
+    console.error(`Erro ao buscar arquivos de serviço para OS ID ${ordemId}:`, error);
+    return [];
+  }
+}
+
+/**
+ * Salva um serviço individual executado para uma OS.
+ * @param {string} osId - ID da Ordem de Serviço.
+ * @param {object} servicoData - Dados do serviço { descricao, tecnicos, status, observacao }.
+ * @returns {Promise<object>} Resposta da API, incluindo o ID do serviço salvo.
+ */
+async function salvarServicoIndividual(osId, servicoData) {
+  try {
+    const response = await fetch(`${API_URL}/ordem-servico/${osId}/servico`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(servicoData)
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: "Erro desconhecido ao salvar serviço individual." }));
+      throw new Error(errorData.message || `Erro ${response.status} ao salvar serviço individual`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error(`Erro ao salvar serviço individual para OS ID ${osId}:`, error);
+    mostrarMensagem(error.message || "Erro ao salvar serviço individual. Tente novamente.", "erro");
+    throw error;
+  }
+}
+
+/**
+ * Busca dados do campo "Realizado" do Notion.
+ * @param {string} osId - ID da Ordem de Serviço.
+ * @returns {Promise<string>} Conteúdo do campo "Realizado".
+ */
+async function getCampoRealizadoNotion(osId) {
+  try {
+    const response = await fetch(`${API_URL}/ordem-servico/${osId}/campo-realizado`);
+    if (!response.ok) {
+      if (response.status === 404) {
+        console.warn(`Campo "Realizado" não encontrado ou vazio para OS ID: ${osId}`);
+        return null;
+      }
+      const errorData = await response.json().catch(() => ({ message: "Erro desconhecido ao buscar campo \"Realizado\"." }));
+      throw new Error(errorData.message || `Erro ${response.status} ao buscar campo \"Realizado\"`);
+    }
+    const data = await response.json();
+    return data.realizadoTexto;
+  } catch (error) {
+    console.error(`Erro ao buscar campo "Realizado" para OS ID ${osId}:`, error);
+    throw error;
+  }
+}
+
+
+// =================================================
+//              MÓDULO DE GERENCIAMENTO
+// =================================================
+
+/**
+ * Busca ordens de serviço para a tela de gerenciamento, com filtros.
+ * @param {Object} filtros - Objeto contendo os filtros a serem aplicados.
+ * @returns {Promise<Array>} Lista de ordens de serviço filtradas.
+ */
+async function getOrdensGerenciamento(filtros = {}) {
+  try {
+    const queryParams = new URLSearchParams(filtros).toString();
+    const response = await fetch(`${API_URL}/api/gerenciamento/ordens?${queryParams}`);
+    if (!response.ok) {
+      throw new Error("Erro ao buscar ordens para gerenciamento");
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Erro em getOrdensGerenciamento:", error);
+    return [];
+  }
+}
+
+/**
+ * Busca os dados detalhados de uma ordem de serviço específica pelo ID.
+ * @param {string} ordemId - ID da ordem de serviço.
+ * @returns {Promise<Object>} Dados detalhados da ordem de serviço.
+ */
+async function getOrdemDetalhada(ordemId) {
+  try {
+    const response = await fetch(`${API_URL}/api/gerenciamento/ordens/${ordemId}`);
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error("Ordem não encontrada para este ID");
+      } else {
+        throw new Error("Erro ao buscar detalhes da ordem");
+      }
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Erro em getOrdemDetalhada:", error);
+    throw error;
+  }
+}
+
+/**
+ * Atualiza os dados de uma ordem de serviço existente.
+ * @param {string} ordemId - ID da ordem de serviço a ser atualizada.
+ * @param {Object} dadosParaAtualizar - Objeto contendo os campos e valores a serem atualizados.
+ * @returns {Promise<Object>} Resposta da atualização.
+ */
+async function atualizarOrdem(ordemId, dadosParaAtualizar) {
+  try {
+    const response = await fetch(`${API_URL}/api/gerenciamento/ordens/${ordemId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(dadosParaAtualizar)
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: "Erro desconhecido ao atualizar ordem." }));
+      throw new Error(errorData.message || "Erro ao atualizar ordem de serviço");
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Erro em atualizarOrdem:", error);
+    throw error;
+  }
+}
+
+/**
+ * Cria uma nova ordem de serviço marcada como reaberta, vinculada a uma original.
+ * @param {Object} dadosNovaOs - Dados da nova ordem de serviço.
+ * @returns {Promise<Object>} Resposta da criação da nova ordem.
+ */
+async function criarOrdemReaberta(dadosNovaOs) {
+  try {
+    const response = await fetch(`${API_URL}/api/gerenciamento/ordens/reabrir`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(dadosNovaOs)
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: "Erro desconhecido ao reabrir ordem." }));
+      throw new Error(errorData.message || "Erro ao reabrir ordem de serviço");
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Erro em criarOrdemReaberta:", error);
+    throw error;
+  }
+}
+
+
+// =================================================
+//              MÓDULO ISOLADO (Edição/Reabertura v2)
+// =================================================
+
+/**
+ * Busca os dados detalhados de uma ordem de serviço específica pelo ID (versão isolada).
+ * @param {string} ordemId - ID da ordem de serviço.
+ * @returns {Promise<Object>} Dados detalhados da ordem de serviço.
+ */
+async function getOrdemDetalhada_isolado(ordemId) {
+  try {
+    const response = await fetch(`${API_URL}/api/gerenciamento_isolado/ordens/${ordemId}`);
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error("Ordem não encontrada para este ID (isolado)");
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Erro ao buscar detalhes da ordem (isolado): ${response.status} ${errorText}`);
+      }
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Erro em getOrdemDetalhada_isolado:', error);
+    throw error;
+  }
+}
+
+/**
+ * Atualiza os dados de uma ordem de serviço existente (versão isolada).
+ * @param {string} ordemId - ID da ordem de serviço a ser atualizada.
+ * @param {Object} dadosParaAtualizar - Objeto contendo os campos e valores a serem atualizados.
+ * @returns {Promise<Object>} Resposta da atualização.
+ */
+async function atualizarOrdem_isolado(ordemId, dadosParaAtualizar) {
+  try {
+    const response = await fetch(`${API_URL}/api/gerenciamento_isolado/ordens/${ordemId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dadosParaAtualizar)
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Erro desconhecido ao atualizar ordem (isolado).' }));
+      throw new Error(errorData.message || 'Erro ao atualizar ordem de serviço (isolado)');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Erro em atualizarOrdem_isolado:', error);
+    throw error;
+  }
+}
+
+/**
+ * Cria uma nova ordem de serviço marcada como reaberta, vinculada a uma original (versão isolada).
+ * @param {Object} dadosNovaOs - Dados da nova ordem de serviço.
+ * @returns {Promise<Object>} Resposta da criação da nova ordem.
+ */
+async function criarOrdemReaberta_isolado(dadosNovaOs) {
+  try {
+    const response = await fetch(`${API_URL}/api/gerenciamento_isolado/ordens/reabrir`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dadosNovaOs)
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Erro desconhecido ao reabrir ordem (isolado).' }));
+      throw new Error(errorData.message || 'Erro ao reabrir ordem de serviço (isolado)');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Erro em criarOrdemReaberta_isolado:', error);
+    throw error;
+  }
+}

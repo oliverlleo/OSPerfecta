@@ -329,7 +329,7 @@ async function getOrdensPorData(dataStr) {
             .select(`
                 *,
                 clients(name),
-                client_locations(name),
+                client_locations(name, address, city),
                 service_types(name),
                 responsibles(name),
                 work_order_providers(providers(name))

@@ -404,20 +404,25 @@ document.addEventListener("DOMContentLoaded", async () => {
       listaServicos.appendChild(servicoItem);
 
       // Aplicar dados se o serviço já foi salvo anteriormente
+      // Aplicar dados se o serviço já foi salvo anteriormente
+      // Normalizar para garantir comparação correta
       if (servicosExecutadosFirebase) {
+        let servicoExecutado = null;
         if (Array.isArray(servicosExecutadosFirebase)) {
-            const servicoExecutado = servicosExecutadosFirebase.find(s => s.descricao === servicoDescricao);
-            if (servicoExecutado) {
-                aplicarDadosServicoExecutado(servicoItem, servicoExecutado);
-            }
+             servicoExecutado = servicosExecutadosFirebase.find(s => s.descricao.trim() === servicoDescricao.trim());
         } else {
+            // Fallback para objeto (legado/firebase style se ainda existir)
             for (const key in servicosExecutadosFirebase) {
-              const servicoExecutado = servicosExecutadosFirebase[key];
-              if (servicoExecutado.descricao === servicoDescricao) {
-                aplicarDadosServicoExecutado(servicoItem, servicoExecutado);
+              const se = servicosExecutadosFirebase[key];
+              if (se.descricao.trim() === servicoDescricao.trim()) {
+                servicoExecutado = se;
                 break;
               }
             }
+        }
+
+        if (servicoExecutado) {
+            aplicarDadosServicoExecutado(servicoItem, servicoExecutado);
         }
       }
     });
@@ -650,6 +655,36 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (btnPendenciasModal) {
     btnPendenciasModal.addEventListener("click", () => finalizarServicoComStatus("Gerou Pendências"));
+  }
+
+  // --- Botão Salvar Informações ---
+  const btnSalvarInformacoes = document.getElementById("btnSalvarInformacoes");
+  if (btnSalvarInformacoes) {
+      btnSalvarInformacoes.addEventListener("click", async () => {
+          const informacoes = informacoesTextarea.value.trim();
+          if (!informacoes) {
+              mostrarMensagem("O campo de informações está vazio.", "erro");
+              return;
+          }
+
+          try {
+              btnSalvarInformacoes.disabled = true;
+              btnSalvarInformacoes.textContent = "Salvando...";
+
+              // Atualiza o campo pendencias_text (ou realizado_text se status for concluído? melhor salvar em pendencias por padrão ou ambos)
+              // Vamos salvar em pendencias_text por segurança, ou observations_text se for nota geral.
+              // Como "Informações" é usado para conclusão, vamos salvar em 'pendencias' para não perder.
+              await atualizarStatusOrdem(ordemId, { pendencias: informacoes });
+
+              mostrarMensagem("Informações salvas com sucesso!", "sucesso");
+          } catch (error) {
+              console.error("Erro ao salvar informações:", error);
+              mostrarMensagem("Erro ao salvar informações.", "erro");
+          } finally {
+              btnSalvarInformacoes.disabled = false;
+              btnSalvarInformacoes.textContent = "Salvar Informações";
+          }
+      });
   }
 
   // --- Carregamento de Dados e Arquivos (manter e adaptar) ---

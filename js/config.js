@@ -4,14 +4,16 @@
 const SUPABASE_URL = 'https://wlfwtwhojwckhqwcrujg.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsZnd0d2hvandja2hxd2NydWpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwNzc3MzksImV4cCI6MjA4NTY1MzczOX0.zfQlnEWyBzno9drxyVoN4e6TPM2vzEjT9dDWZBdDm_k';
 
-// Inicializa o cliente Supabase
+// Inicializa o cliente Supabase de forma segura
 // Certifique-se de que a biblioteca supabase-js foi carregada antes deste arquivo
-let supabase;
-if (typeof createClient !== 'undefined') {
-    supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-} else if (window.supabase) {
-    // Caso use o CDN que expõe window.supabase
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+if (typeof supabase === 'undefined') {
+    if (typeof createClient !== 'undefined') {
+        var supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+    } else if (window.supabase && window.supabase.createClient) {
+        var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    } else {
+        console.error('Supabase SDK not loaded. Please include the script tag for @supabase/supabase-js.');
+    }
 }
 
 // Formatadores

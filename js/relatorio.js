@@ -753,6 +753,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       dataSolicitacaoOS.textContent = formatarData(ordem.dataSolicitacao || ordem.DTS);
       responsavelOS.textContent = ordem.RSP || ordem.responsavel || "N/A";
 
+      // Preencher o campo de informações com os dados salvos (pendências ou realizado)
+      if (informacoesTextarea) {
+          informacoesTextarea.value = ordem.pendencias || ordem.realizado || "";
+      }
+
       if (ordem.STS === "Não iniciada" || ordem.status === "Não iniciada") {
         iniciarServicoDiv.style.display = "block";
         servicosContainer.style.display = "none";

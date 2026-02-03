@@ -56,6 +56,48 @@ document.addEventListener("DOMContentLoaded", async () => {
             cidadeInput.value = ordemOriginal.cidade || "-";
             historicoOSInput.value = ordemOriginal.numeroOS || "-"; // Preenche Histórico com Nº OS original
 
+            // 2.1 Preencher Painel Informativo da OS Original
+            const infoContainer = document.getElementById("infoOSOriginal");
+            if (infoContainer) {
+                document.getElementById("statusOriginal").textContent = ordemOriginal.status || "N/A";
+
+                // Formatar Serviços Realizados (se houver serviçosExecutados, usa; senão realizado_text)
+                const servicosContainer = document.getElementById("servicosRealizadosOriginal");
+                servicosContainer.innerHTML = "";
+
+                if (ordemOriginal.servicosExecutados && ordemOriginal.servicosExecutados.length > 0) {
+                    ordemOriginal.servicosExecutados.forEach(s => {
+                        const p = document.createElement("p");
+                        p.textContent = `• ${s.descricao} (${s.status}) - ${s.tecnicos.join(', ')}`;
+                        if(s.observacao) p.textContent += ` [Obs: ${s.observacao}]`;
+                        p.style.margin = "5px 0";
+                        servicosContainer.appendChild(p);
+                    });
+                } else if (ordemOriginal.realizado) {
+                    servicosContainer.innerHTML = `<p>${ordemOriginal.realizado.replace(/\n/g, "<br>")}</p>`;
+                } else {
+                    servicosContainer.innerHTML = "<p>Nenhum serviço registrado.</p>";
+                }
+
+                // Informações Adicionais (Pendências ou Observações)
+                // Se foi finalizada com pendências, mostra pendencias. Se concluída, mostra realizado (se for texto livre).
+                // Mas aqui queremos o campo "Informações" que salvamos em 'pendencias' ou 'realizado'.
+                // Vamos mostrar ambos se existirem.
+                let infoAdicional = "";
+                if (ordemOriginal.pendencias) infoAdicional += `Pendências: ${ordemOriginal.pendencias}\n`;
+                // Se realizado já foi exibido acima (se não houver servicosExecutados), não duplicar.
+                // Mas se houver servicosExecutados, 'realizado' pode conter o resumo final.
+                if (ordemOriginal.servicosExecutados && ordemOriginal.servicosExecutados.length > 0 && ordemOriginal.realizado) {
+                     // Verifica se 'realizado' é apenas uma cópia dos itens ou texto novo.
+                     // Vamos exibir por segurança.
+                     infoAdicional += `Resumo Realizado: ${ordemOriginal.realizado}\n`;
+                }
+
+                document.getElementById("informacoesAdicionaisOriginal").textContent = infoAdicional || "Nenhuma informação adicional.";
+
+                infoContainer.style.display = "block";
+            }
+
             // 3. Carregar opções para campos editáveis (Locais, Equipes, etc.) - SEM pré-selecionar
             
             // Função auxiliar para popular selects (igual a editar_os.js)

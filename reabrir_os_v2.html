@@ -70,6 +70,26 @@
 
     <main class="container">
         <h2>Reabrir Ordem de Serviço</h2> <!-- Cabeçalho alterado -->
+
+        <!-- Painel de Informações da OS Original -->
+        <div id="infoOSOriginal" class="form-container" style="display: none; background-color: #f8f9fa; border-left: 4px solid #007bff; margin-bottom: 20px;">
+            <h3>Detalhes da O.S. Anterior</h3>
+            <div class="form-group">
+                <label>Status Final:</label>
+                <p id="statusOriginal" style="font-weight: bold;"></p>
+            </div>
+            <div class="form-group">
+                <label>Últimos Serviços Realizados:</label>
+                <div id="servicosRealizadosOriginal" style="padding: 10px; background: #fff; border: 1px solid #ddd; border-radius: 4px;">
+                    <!-- Lista de serviços será injetada aqui -->
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Informações Adicionais / Pendências:</label>
+                <p id="informacoesAdicionaisOriginal" style="white-space: pre-wrap;"></p>
+            </div>
+        </div>
+
         <div class="form-container" id="formReabrirOS">
             <p id="loadingMessage">Carregando dados da O.S. original...</p>
             <!-- O formulário será preenchido dinamicamente via JS -->

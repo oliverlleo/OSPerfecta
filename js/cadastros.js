@@ -250,9 +250,49 @@ async function salvarTipo() { genericSave('service_types', 'Tipo'); }
 async function carregarPrestadores() {
     genericLoad('providers', 'listaPrestadores', 'editarPrestador', 'providers', 'buscaPrestador');
 }
-function abrirModalPrestador() { genericOpenModal('Prestador'); }
-async function editarPrestador(id) { genericEdit('providers', id, 'Prestador'); }
-async function salvarPrestador() { genericSave('providers', 'Prestador'); }
+function abrirModalPrestador() {
+    genericOpenModal('Prestador');
+    document.getElementById('prestadorLogin').value = '';
+    document.getElementById('prestadorSenha').value = '';
+}
+async function editarPrestador(id) {
+    // Custom edit for provider to include login/pass
+    const { data, error } = await supabaseClient.from('providers').select('*').eq('id', id).single();
+    if (error) return toast('Erro ao buscar', 'erro');
+
+    document.getElementById('prestadorId').value = data.id;
+    document.getElementById('prestadorNome').value = data.name;
+    document.getElementById('prestadorLogin').value = data.login || '';
+    document.getElementById('prestadorSenha').value = data.password || '';
+    document.getElementById('prestadorAtivo').checked = data.active;
+    document.getElementById('modalPrestadorTitulo').textContent = 'Editar Prestador';
+    new bootstrap.Modal(document.getElementById('modalPrestador')).show();
+}
+async function salvarPrestador() {
+    // Custom save for provider
+    const id = document.getElementById('prestadorId').value;
+    const name = document.getElementById('prestadorNome').value;
+    const login = document.getElementById('prestadorLogin').value;
+    const password = document.getElementById('prestadorSenha').value;
+    const active = document.getElementById('prestadorAtivo').checked;
+
+    if (!name || !login || !password) return toast('Todos os campos são obrigatórios', 'erro');
+    if (password.length !== 4) return toast('A senha deve ter 4 dígitos', 'erro');
+
+    const dados = { name, login, password, active, updated_at: new Date() };
+
+    if (id) {
+        const { error } = await supabaseClient.from('providers').update(dados).eq('id', id);
+        if (error) return toast('Erro ao atualizar: ' + error.message, 'erro');
+    } else {
+        const { error } = await supabaseClient.from('providers').insert(dados);
+        if (error) return toast('Erro ao criar: ' + error.message, 'erro');
+    }
+
+    bootstrap.Modal.getInstance(document.getElementById('modalPrestador')).hide();
+    toast('Salvo com sucesso');
+    carregarPrestadores();
+}
 
 
 // --- Genéricos para tabelas simples (Nome/Ativo) ---

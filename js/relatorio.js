@@ -262,7 +262,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (btnSalvarServicoIndividual) {
         btnSalvarServicoIndividual.disabled = true;
         btnSalvarServicoIndividual.textContent = "Salvo";
-        btnSalvarServicoIndividual.classList.remove("btn-success");
+        btnSalvarServicoIndividual.classList.remove("btn-primary", "btn-success"); // Ensure primary is removed
         btnSalvarServicoIndividual.classList.add("btn-secondary");
         // ADIÇÃO: Animação de feedback no botão
         btnSalvarServicoIndividual.style.transform = "scale(0.95)";

@@ -286,7 +286,7 @@ function mapOsToLegacy(os) {
         // Campos extras para relatório
         servicosExecutados: (os.work_order_service_exec || []).map(s => ({
             id: s.id,
-            descricao: s.description,
+            descricao: s.description || "",
             tecnicos: s.technicians ? s.technicians.split(',').map(t => t.trim()) : [],
             status: s.status,
             observacao: s.note

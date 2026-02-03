@@ -410,12 +410,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (servicosExecutadosFirebase) {
         let servicoExecutado = null;
         if (Array.isArray(servicosExecutadosFirebase)) {
-             servicoExecutado = servicosExecutadosFirebase.find(s => s.descricao.trim() === servicoDescricao.trim());
+             servicoExecutado = servicosExecutadosFirebase.find(s => s.descricao && s.descricao.trim() === servicoDescricao.trim());
         } else {
             // Fallback para objeto (legado/firebase style se ainda existir)
             for (const key in servicosExecutadosFirebase) {
               const se = servicosExecutadosFirebase[key];
-              if (se.descricao.trim() === servicoDescricao.trim()) {
+              if (se.descricao && se.descricao.trim() === servicoDescricao.trim()) {
                 servicoExecutado = se;
                 break;
               }

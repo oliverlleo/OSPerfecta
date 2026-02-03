@@ -221,7 +221,7 @@ async function criarOrdemServico(dados) {
  */
 function mapOsToLegacy(os) {
     if (!os) return null;
-    
+
     // Prestadores
     let prestadoresList = [];
     if (os.work_order_providers) {
@@ -705,4 +705,3 @@ window.atualizarOrdem = atualizarOrdem;
 window.atualizarOrdem_isolado = atualizarOrdem_isolado;
 window.criarOrdemReaberta = criarOrdemReaberta;
 window.criarOrdemReaberta_isolado = criarOrdemReaberta_isolado;
-

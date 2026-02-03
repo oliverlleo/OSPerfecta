@@ -37,17 +37,17 @@ const formatarDataHora = (dataString) => {
 // Funções de utilidade
 const mostrarMensagem = (mensagem, tipo = 'info') => {
   let mensagemElement = document.getElementById('mensagem-sistema');
-  
+
   if (!mensagemElement) {
     mensagemElement = document.createElement('div');
     mensagemElement.id = 'mensagem-sistema';
     document.body.appendChild(mensagemElement);
   }
-  
+
   mensagemElement.className = `mensagem mensagem-${tipo}`;
   mensagemElement.textContent = mensagem;
   mensagemElement.style.display = 'block';
-  
+
   setTimeout(() => {
     mensagemElement.style.display = 'none';
   }, 5000);

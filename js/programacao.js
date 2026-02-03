@@ -191,20 +191,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     carregarOrdensDoDia();
   });
 
-  // Eventos dos botões
-  exportarPDFBtn.addEventListener('click', exportarPDF);
-  exportarJPEGBtn.addEventListener('click', exportarJPEG);
-  exportarTextoBtn.addEventListener('click', exportarTexto);
+  // Eventos dos botões (verificando existência)
+  if (exportarPDFBtn) exportarPDFBtn.addEventListener('click', exportarPDF);
+  if (exportarJPEGBtn) exportarJPEGBtn.addEventListener('click', exportarJPEG);
+  if (exportarTextoBtn) exportarTextoBtn.addEventListener('click', exportarTexto);
   
-  limparDadosBtn.addEventListener('click', () => {
-    listaObrasExternas.innerHTML = '<p class="empty-message">Nenhuma ordem de serviço de instalação ou manutenção cadastrada.</p>';
-    listaServicosFabrica.innerHTML = '<p class="empty-message">Nenhuma ordem de serviço de fábrica cadastrada.</p>';
-    mostrarMensagem('Dados limpos com sucesso!', 'sucesso');
-  });
+  if (limparDadosBtn) {
+    limparDadosBtn.addEventListener('click', () => {
+        listaObrasExternas.innerHTML = '<p class="empty-message">Nenhuma ordem de serviço de instalação ou manutenção cadastrada.</p>';
+        listaServicosFabrica.innerHTML = '<p class="empty-message">Nenhuma ordem de serviço de fábrica cadastrada.</p>';
+        mostrarMensagem('Dados limpos com sucesso!', 'sucesso');
+    });
+  }
   
-  gerarOSBtn.addEventListener('click', () => {
-    window.location.href = 'index.html';
-  });
+  if (gerarOSBtn) {
+    gerarOSBtn.addEventListener('click', () => {
+        window.location.href = 'index.html';
+    });
+  }
 
   // Inicialização
   await carregarOrdensDoDia();

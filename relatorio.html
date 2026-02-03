@@ -131,6 +131,24 @@
             </div>
         </div>
 
+        <!-- MODAL DE LOGIN DO PRESTADOR -->
+        <div id="modalLoginPrestador" class="modal" style="display: none; background-color: rgba(0,0,0,0.9); z-index: 9999;">
+            <div class="modal-content" style="max-width: 400px; text-align: center;">
+                <h3>Acesso Restrito</h3>
+                <p>Este relatório é protegido. Informe suas credenciais de prestador.</p>
+                <div class="form-group">
+                    <label>Login:</label>
+                    <input type="text" id="prestadorLogin" class="form-control" placeholder="Seu login">
+                </div>
+                <div class="form-group">
+                    <label>Senha (4 dígitos):</label>
+                    <input type="password" id="prestadorSenha" class="form-control" placeholder="****" maxlength="4">
+                </div>
+                <button id="btnEntrarPrestador" class="btn btn-primary w-100 mt-3">Acessar</button>
+                <p id="erroLoginPrestador" style="color: red; display: none; margin-top: 10px;">Credenciais inválidas.</p>
+            </div>
+        </div>
+
     </main>
 
     <footer>

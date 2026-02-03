@@ -272,6 +272,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const prestadores = Array.from(prestadoresSelect.selectedOptions).map(
       (option) => option.value
     );
+    const anexosInput = document.getElementById("anexoOS");
+    const arquivos = anexosInput.files;
 
     if (
       !clienteId ||
@@ -301,6 +303,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         observacoes,
         tipoServico,
         responsavel, // Envia o responsável
+        arquivos // Envia os arquivos
       });
 
       let slugResponse;

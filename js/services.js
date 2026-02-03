@@ -208,6 +208,31 @@ async function criarOrdemServico(dados) {
             }
         }
 
+        // Upload Arquivos
+        if (dados.arquivos && dados.arquivos.length > 0) {
+            for (let i = 0; i < dados.arquivos.length; i++) {
+                const arquivo = dados.arquivos[i];
+                const fileExt = arquivo.name.split('.').pop();
+                const fileName = `${os.id}/${Date.now()}_${i}.${fileExt}`;
+                const filePath = `${fileName}`;
+
+                const { data: uploadData, error: uploadError } = await supabaseClient.storage
+                    .from('os-files')
+                    .upload(filePath, arquivo);
+
+                if (uploadError) {
+                    console.error("Erro ao fazer upload de arquivo:", uploadError);
+                    continue;
+                }
+
+                await supabaseClient.from('work_order_files').insert({
+                    work_order_id: os.id,
+                    file_name: arquivo.name,
+                    storage_path: filePath
+                });
+            }
+        }
+
         return os;
 
     } catch (error) {
@@ -232,11 +257,18 @@ function mapOsToLegacy(os) {
         id: os.id,
         numeroOS: os.os_number,
         cliente: os.clients?.name,
+        // Mapping para compatibilidade com o que o relatorio.js espera (algumas versões usam clienteNome)
+        clienteNome: os.clients?.name,
         clienteId: os.client_id,
         localNome: os.client_locations?.name,
         localId: os.location_id,
+        // Endereço e Cidade mapeados para múltiplos possíveis nomes esperados
         endereco: os.client_locations?.address,
+        localEndereco: os.client_locations?.address,
+        clienteEndereco: os.client_locations?.address,
         cidade: os.client_locations?.city,
+        localCidade: os.client_locations?.city,
+        clienteCidade: os.client_locations?.city,
         status: os.status,
         agendamentoInicial: os.scheduled_start,
         agendamentoFinal: os.scheduled_end,
@@ -255,11 +287,7 @@ function mapOsToLegacy(os) {
         servicosExecutados: (os.work_order_service_exec || []).map(s => ({
             id: s.id,
             descricao: s.description,
-            tecnicos: s.technicians ? s.technicians.split(',').map(t => t.trim()) : [], // Assuming stored as comma string or JSON string?
-            // Wait, Supabase stores text. If I save array, does it stringify?
-            // In salvarServicoIndividual I pass it directly. If it is array, Postgres might reject if col is text?
-            // PostgREST handles JSON body. If col is text, I should stringify or join.
-            // Let's assume I join it in salvarServicoIndividual.
+            tecnicos: s.technicians ? s.technicians.split(',').map(t => t.trim()) : [],
             status: s.status,
             observacao: s.note
         }))
@@ -295,8 +323,6 @@ async function getOrdens() {
  * Busca Ordens por Data (Overlap)
  */
 async function getOrdensPorData(dataStr) {
-    // dataStr is YYYY-MM-DD
-    // Overlap: start <= data AND end >= data
     try {
         const { data, error } = await supabaseClient
             .from('work_orders')
@@ -371,15 +397,19 @@ async function getOrdemPorSlug(slug) {
         if (!data) throw new Error("Ordem não encontrada");
 
         // Mapear retorno do RPC (JSON) para formato legado
-        // O RPC já retorna JSON estruturado, precisamos adaptar
         const wo = data.work_order;
         const result = {
             id: wo.id,
             numeroOS: wo.os_number,
             cliente: data.client?.name,
+            clienteNome: data.client?.name,
             localNome: data.location?.name,
             endereco: data.location?.address,
+            localEndereco: data.location?.address,
+            clienteEndereco: data.location?.address,
             cidade: data.location?.city,
+            localCidade: data.location?.city,
+            clienteCidade: data.location?.city,
             status: wo.status,
             agendamentoInicial: wo.scheduled_start,
             agendamentoFinal: wo.scheduled_end,
@@ -422,19 +452,6 @@ async function atualizarStatusOrdem(ordemId, dados) {
 
         if (error) throw error;
 
-        // Se houver serviços individuais para salvar (array)
-        if (dados.servicosIndividuais && Array.isArray(dados.servicosIndividuais)) {
-            for (const serv of dados.servicosIndividuais) {
-                // Se tem ID atualiza, se não cria?
-                // O front geralmente manda o objeto completo.
-                // Vamos simplificar: salvarServicoIndividual deve ser chamado para cada um ou loop aqui.
-                // Mas a função finalizarOS manda um objeto 'servicosExecutados' que é um MAP ou Array?
-                // No código legado parecia ser um objeto. Vamos ver.
-                // Assume-se que 'servicosIndividuais' aqui seja tratado se for passado.
-                // Mas a função `salvarServicoIndividual` existe separada.
-            }
-        }
-
         return { success: true };
     } catch (error) {
         console.error("Erro ao atualizar status:", error);
@@ -465,8 +482,6 @@ async function finalizarOS(ordemId, statusFinal, informacoesAdicionais, servicos
     } else {
         dados.pendencias = informacoesAdicionais;
     }
-    // servicosExecutados logic is handled separately usually via salvarServicoIndividual calls in UI?
-    // Or we should save them here.
     return atualizarStatusOrdem(ordemId, dados);
 }
 
@@ -484,7 +499,6 @@ async function salvarServicoIndividual(osId, servicoData) {
             updated_at: new Date()
         };
 
-        // Se tiver ID, update
         let result;
         if (servicoData.id) {
              result = await supabaseClient.from('work_order_service_exec').update(payload).eq('id', servicoData.id);
@@ -519,16 +533,12 @@ async function getOrdensGerenciamento(filtros = {}) {
 
         if (filtros.numeroOS) query = query.eq('os_number', filtros.numeroOS);
 
-        // Status Multi
         if (filtros.status) {
-            // filtros.status pode ser string única ou array?
-            // Se for string "Pendente,Concluido"
             const statusList = filtros.status.split(',').filter(Boolean);
             if (statusList.length > 0) query = query.in('status', statusList);
         }
 
         if (filtros.cliente) {
-             // clients!inner(name)
              query = supabaseClient
                 .from('work_orders')
                 .select(`
@@ -631,7 +641,6 @@ async function atualizarOrdem_isolado(id, dados) { return atualizarOrdem(id, dad
  */
 async function atualizarOrdem(id, dados) {
     try {
-        // Mapear dados do front para DB
         const payload = {
             scheduled_start: dados.agendamentoInicial,
             scheduled_end: dados.agendamentoFinal,
@@ -642,14 +651,12 @@ async function atualizarOrdem(id, dados) {
 
         if (dados.localId) payload.location_id = dados.localId;
 
-        // Resolver IDs de nomes se necessário
         if (dados.tipoServico) payload.service_type_id = await getIdByName('service_types', dados.tipoServico);
         if (dados.responsavel) payload.responsible_id = await getIdByName('responsibles', dados.responsavel);
 
         const { error } = await supabaseClient.from('work_orders').update(payload).eq('id', id);
         if (error) throw error;
 
-        // Atualizar Prestadores (Delete + Insert)
         if (dados.prestadores) {
             await supabaseClient.from('work_order_providers').delete().eq('work_order_id', id);
 
@@ -676,10 +683,44 @@ async function atualizarOrdem(id, dados) {
  * Reabrir OS
  */
 async function criarOrdemReaberta(dados) {
-    // Basicamente criarOrdemServico mas com historico_os
     return criarOrdemServico(dados);
 }
 async function criarOrdemReaberta_isolado(dados) { return criarOrdemReaberta(dados); }
+
+/**
+ * Busca os arquivos de serviço para uma OS
+ */
+async function getArquivosServicoPorOrdemId(ordemId) {
+    try {
+        const { data, error } = await supabaseClient
+            .from('work_order_files')
+            .select('*')
+            .eq('work_order_id', ordemId);
+
+        if (error) throw error;
+
+        // Gerar URLs assinadas
+        const arquivos = [];
+        for (const file of data) {
+            const { data: signedData, error: signedError } = await supabaseClient.storage
+                .from('os-files')
+                .createSignedUrl(file.storage_path, 3600);
+
+            if (!signedError) {
+                arquivos.push({
+                    name: file.file_name,
+                    url: signedData.signedUrl
+                });
+            }
+        }
+
+        return arquivos;
+
+    } catch (error) {
+        console.error(`Erro ao buscar arquivos de serviço para OS ID ${ordemId}:`, error);
+        return [];
+    }
+}
 
 // Exportar globalmente (janela)
 window.getClientes = getClientes;
@@ -705,3 +746,4 @@ window.atualizarOrdem = atualizarOrdem;
 window.atualizarOrdem_isolado = atualizarOrdem_isolado;
 window.criarOrdemReaberta = criarOrdemReaberta;
 window.criarOrdemReaberta_isolado = criarOrdemReaberta_isolado;
+window.getArquivosServicoPorOrdemId = getArquivosServicoPorOrdemId;

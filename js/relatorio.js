@@ -834,7 +834,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const video = document.createElement("video");
       video.src = url;
       video.controls = true;
-      video.autoplay = true; // Considerar remover autoplay se for intrusivo
+      // video.autoplay = true; // Removido para evitar AbortError: The play() request was interrupted by a call to pause().
       video.style.maxWidth = "100%";
       video.style.maxHeight = "100%";
       arquivoModalContent.appendChild(video);

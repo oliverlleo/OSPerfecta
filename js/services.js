@@ -22,7 +22,7 @@ const mapLocalToFrontend = (l) => ({
  */
 async function getClientes() {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('clients')
             .select('*')
             .eq('active', true)
@@ -42,7 +42,7 @@ async function getClientes() {
  */
 async function getLocais() {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('client_locations')
             .select('*, clients(name)')
             .eq('active', true)
@@ -62,7 +62,7 @@ async function getLocais() {
  */
 async function getLocaisPorCliente(clienteId) {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('client_locations')
             .select('*, clients(name)')
             .eq('client_id', clienteId)
@@ -82,7 +82,7 @@ async function getLocaisPorCliente(clienteId) {
  */
 async function getEquipe() {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('providers')
             .select('id, name')
             .eq('active', true)
@@ -101,7 +101,7 @@ async function getEquipe() {
  */
 async function getResponsaveis() {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('responsibles')
             .select('id, name')
             .eq('active', true)
@@ -120,7 +120,7 @@ async function getResponsaveis() {
  */
 async function getTiposServico() {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('service_types')
             .select('id, name')
             .eq('active', true)
@@ -179,7 +179,7 @@ async function criarOrdemServico(dados) {
         }
 
         // Insert OS
-        const { data: os, error } = await supabase
+        const { data: os, error } = await supabaseClient
             .from('work_orders')
             .insert(payload)
             .select()
@@ -271,7 +271,7 @@ function mapOsToLegacy(os) {
  */
 async function getOrdens() {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('work_orders')
             .select(`
                 *,
@@ -298,7 +298,7 @@ async function getOrdensPorData(dataStr) {
     // dataStr is YYYY-MM-DD
     // Overlap: start <= data AND end >= data
     try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('work_orders')
             .select(`
                 *,
@@ -325,7 +325,7 @@ async function getOrdensPorData(dataStr) {
  */
 async function getOrdemPorId(id) {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('work_orders')
             .select(`
                 *,
@@ -415,7 +415,7 @@ async function atualizarStatusOrdem(ordemId, dados) {
         if (dados.realizado) updatePayload.realizado_text = dados.realizado;
         if (dados.pendencias) updatePayload.pendencias_text = dados.pendencias;
 
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('work_orders')
             .update(updatePayload)
             .eq('id', ordemId);
@@ -505,7 +505,7 @@ async function salvarServicoIndividual(osId, servicoData) {
  */
 async function getOrdensGerenciamento(filtros = {}) {
     try {
-        let query = supabase
+        let query = supabaseClient
             .from('work_orders')
             .select(`
                 *,
@@ -529,7 +529,7 @@ async function getOrdensGerenciamento(filtros = {}) {
 
         if (filtros.cliente) {
              // clients!inner(name)
-             query = supabase
+             query = supabaseClient
                 .from('work_orders')
                 .select(`
                     *,
@@ -544,7 +544,7 @@ async function getOrdensGerenciamento(filtros = {}) {
         }
 
         if (filtros.local) {
-             query = supabase
+             query = supabaseClient
                 .from('work_orders')
                 .select(`
                     *,
@@ -559,7 +559,7 @@ async function getOrdensGerenciamento(filtros = {}) {
         }
 
         if (filtros.responsavel) {
-             query = supabase
+             query = supabaseClient
                 .from('work_orders')
                 .select(`
                     *,
@@ -574,7 +574,7 @@ async function getOrdensGerenciamento(filtros = {}) {
         }
 
         if (filtros.prestador) {
-             query = supabase
+             query = supabaseClient
                 .from('work_orders')
                 .select(`
                     *,

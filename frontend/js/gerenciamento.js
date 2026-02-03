@@ -231,27 +231,16 @@ if (btnAplicarFiltros) {
     btnAplicarFiltros.addEventListener("click", () => {
         const statusSelecionados = getSelectedStatusValuesGerenciamento();
         
-        // Mapeamento correto dos campos do frontend para os nomes esperados pelo backend/Notion
+        // Mapeamento correto dos campos do frontend para os nomes esperados pelo services.js (Supabase)
         const filtros = {
-            // Mapear para o campo correto no Notion (O.S. -> unique_id)
-            "O.S.": document.getElementById("filtroNumOS").value.trim(),
-            
-            // Mapear para o campo correto no Notion (Cliente -> relation)
-            Cliente: document.getElementById("filtroCliente").value.trim(),
-            
-            // Mapear para o campo correto no Notion (LOCAL -> relation)
-            LOCAL: document.getElementById("filtroLocal").value.trim(),
-            
-            // Mapear para o campo correto no Notion (Status -> status)
-            Status: (statusSelecionados.length === 1 && statusSelecionados[0] === "") ? null : statusSelecionados.join(","),
-            
-            // Mapear para os campos corretos no Notion (datas)
-            "Agendamento Inicial": document.getElementById("filtroAgInicial").value,
-            "Agendamento Final": document.getElementById("filtroAgFinal").value,
-            
-            // Mapear para os campos corretos no Notion
-            Responsável: document.getElementById("filtroResponsavel").value.trim(),
-            Equipe: document.getElementById("filtroPrestador").value.trim(),
+            numeroOS: document.getElementById("filtroNumOS").value.trim(),
+            cliente: document.getElementById("filtroCliente").value.trim(),
+            local: document.getElementById("filtroLocal").value.trim(),
+            status: (statusSelecionados.length === 1 && statusSelecionados[0] === "") ? null : statusSelecionados.join(","),
+            dataInicio: document.getElementById("filtroAgInicial").value,
+            dataFim: document.getElementById("filtroAgFinal").value,
+            responsavel: document.getElementById("filtroResponsavel").value.trim(),
+            prestador: document.getElementById("filtroPrestador").value.trim(),
         };
         
         // Remover campos vazios

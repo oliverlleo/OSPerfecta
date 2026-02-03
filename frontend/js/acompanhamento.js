@@ -50,9 +50,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const btnProximaPagina = document.getElementById("btnProximaPagina");
   const infoPagina = document.getElementById("infoPagina");
 
-  const CACHE_ORDENS_KEY = "perfecta_cache_ordens";
-  const CACHE_ORDENS_DIA_KEY = "perfecta_cache_ordens_dia";
-  const CACHE_CLIENTES_KEY = "perfecta_cache_clientes";
+  const CACHE_ORDENS_KEY = "perfecta_cache_ordens_v2";
+  const CACHE_ORDENS_DIA_KEY = "perfecta_cache_ordens_dia_v2";
+  const CACHE_CLIENTES_KEY = "perfecta_cache_clientes_v2";
   const CACHE_TIMESTAMP_KEY = "perfecta_cache_timestamp";
   const CACHE_EXPIRY_TIME = 24 * 60 * 60 * 1000; 
 

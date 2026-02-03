@@ -139,6 +139,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  // Carregar Tipos de Serviço
+  async function carregarTiposServico() {
+    try {
+      const tipos = await getTiposServico();
+      tipoServicoSelect.innerHTML =
+        '<option value="">Selecione o tipo</option>';
+      tipos.forEach((tipo) => {
+        const option = document.createElement("option");
+        option.value = tipo.name; // Usando nome para manter compatibilidade
+        option.textContent = tipo.name;
+        tipoServicoSelect.appendChild(option);
+      });
+    } catch (error) {
+      console.error("Erro ao carregar tipos de serviço:", error);
+      mostrarMensagem("Erro ao carregar tipos de serviço.", "erro");
+    }
+  }
+
   // Função para carregar locais filtrados por cliente (agora usa clienteSelect.value)
   async function carregarLocais(clienteId) {
     localSelect.innerHTML = '<option value="">Selecione um local</option>';
@@ -300,7 +318,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       mostrarMensagem("Ordem de serviço criada com sucesso!", "sucesso");
 
       try {
-        localStorage.removeItem("perfecta_cache_ordens");
+        localStorage.removeItem("perfecta_cache_ordens_v2");
         localStorage.removeItem("perfecta_cache_timestamp");
         console.log("Cache de ordens invalidado após criação.");
       } catch (cacheError) {
@@ -330,6 +348,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await carregarClientes(); // Carrega clientes e preenche o select escondido
   await carregarEquipes();
   await carregarResponsaveis(); // Carrega os responsáveis
+  await carregarTiposServico(); // Carrega tipos de serviço
 
   // Função auxiliar para mostrar mensagens (mantida como estava)
   function mostrarMensagem(mensagem, tipo) {

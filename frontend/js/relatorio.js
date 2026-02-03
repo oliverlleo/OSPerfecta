@@ -340,12 +340,19 @@ document.addEventListener("DOMContentLoaded", async () => {
       tecnicosSelectionDiv.appendChild(tecnicosLabel);
       let tecnicosJaSelecionadosParaEsteServico = [];
       if (servicosExecutadosFirebase) {
-        for (const key in servicosExecutadosFirebase) {
-          const se = servicosExecutadosFirebase[key];
-          if (se.descricao === servicoDescricao && se.tecnicos) {
-            tecnicosJaSelecionadosParaEsteServico = se.tecnicos;
-            break;
-          }
+        if (Array.isArray(servicosExecutadosFirebase)) {
+             const se = servicosExecutadosFirebase.find(s => s.descricao === servicoDescricao);
+             if (se && se.tecnicos) {
+                 tecnicosJaSelecionadosParaEsteServico = se.tecnicos;
+             }
+        } else {
+            for (const key in servicosExecutadosFirebase) {
+              const se = servicosExecutadosFirebase[key];
+              if (se.descricao === servicoDescricao && se.tecnicos) {
+                tecnicosJaSelecionadosParaEsteServico = se.tecnicos;
+                break;
+              }
+            }
         }
       }
       const dropdownTecnicos = criarDropdownTecnicos(servicoId, tecnicosDisponiveis, tecnicosJaSelecionadosParaEsteServico);
@@ -398,12 +405,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       // Aplicar dados se o serviço já foi salvo anteriormente
       if (servicosExecutadosFirebase) {
-        for (const key in servicosExecutadosFirebase) {
-          const servicoExecutado = servicosExecutadosFirebase[key];
-          if (servicoExecutado.descricao === servicoDescricao) {
-            aplicarDadosServicoExecutado(servicoItem, servicoExecutado);
-            break;
-          }
+        if (Array.isArray(servicosExecutadosFirebase)) {
+            const servicoExecutado = servicosExecutadosFirebase.find(s => s.descricao === servicoDescricao);
+            if (servicoExecutado) {
+                aplicarDadosServicoExecutado(servicoItem, servicoExecutado);
+            }
+        } else {
+            for (const key in servicosExecutadosFirebase) {
+              const servicoExecutado = servicosExecutadosFirebase[key];
+              if (servicoExecutado.descricao === servicoDescricao) {
+                aplicarDadosServicoExecutado(servicoItem, servicoExecutado);
+                break;
+              }
+            }
         }
       }
     });

@@ -481,11 +481,16 @@ document.addEventListener("DOMContentLoaded", async () => {
             mostrarMensagem("Serviço salvo com sucesso!", "sucesso");
             aplicarDadosServicoExecutado(servicoItemElement, servicoData); 
 
-            if (!dadosOrdemAtual.servicos_executados) {
-              dadosOrdemAtual.servicos_executados = {};
+            if (!dadosOrdemAtual.servicosExecutados) {
+              dadosOrdemAtual.servicosExecutados = [];
             }
-            const chaveServicoFirebase = descricaoServico.replace(/[^a-zA-Z0-9]/g, "_");
-            dadosOrdemAtual.servicos_executados[chaveServicoFirebase] = servicoData;
+            // Atualiza array local para refletir a mudança sem recarregar
+            const index = dadosOrdemAtual.servicosExecutados.findIndex(s => s.descricao === descricaoServico);
+            if (index !== -1) {
+                dadosOrdemAtual.servicosExecutados[index] = servicoData;
+            } else {
+                dadosOrdemAtual.servicosExecutados.push(servicoData);
+            }
 
           } catch (error) {
             console.error("Erro ao salvar serviço individual:", error);
@@ -766,7 +771,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         preencherListaServicos(
             ordem.SR || ordem.servicos || "", 
             ordem.PS || ordem.prestadores || [], 
-            dadosOrdemAtual.servicos_executados 
+            dadosOrdemAtual.servicosExecutados
         );
         await carregarArquivosServico(ordemId);
       }

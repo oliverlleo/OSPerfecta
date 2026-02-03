@@ -94,11 +94,11 @@
                         <button id="btnSalvarInformacoes" class="btn btn-secondary mt-2" style="margin-top: 10px;">Salvar Informações</button>
                     </div>
 
-                    <!-- Seção de Anexos modificada para abrir Notion -->
+                    <!-- Seção de Anexos modificada para upload direto -->
                     <div class="form-group">
-                        <label>Anexar/Gerenciar Documentos:</label>
-                        <button id="btnAbrirNotion" class="btn btn-secondary">Abrir OS no Notion</button>
-                        <p class="help-text">Clique no botão para abrir a OS no Notion e gerenciar arquivos diretamente lá.</p>
+                        <label for="novoAnexo">Anexar Imagem:</label>
+                        <input type="file" id="novoAnexo" multiple accept="image/*,video/*" class="form-control">
+                        <button id="btnEnviarAnexo" class="btn btn-secondary mt-2">Enviar Anexo(s)</button>
                     </div>
 
                     <div class="button-group">

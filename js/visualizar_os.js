@@ -97,6 +97,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             document.getElementById("pendencias").textContent = osData.pendencias || "N/A";
             document.getElementById("historicoOS").textContent = osData.historicoOS || "N/A";
 
+            // Carregar Imagens
+            await carregarImagensAnexadas(osId);
+
             loadingMessage.style.display = "none";
         } else {
             loadingMessage.textContent = "Ordem de Serviço não encontrada no Notion.";
@@ -126,3 +129,76 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 });
+
+async function carregarImagensAnexadas(ordemId) {
+    const container = document.getElementById("imagensAnexadasContainer");
+    const loadingMsg = document.getElementById("loadingImagensMsg");
+    const noImagensMsg = document.getElementById("noImagensMsg");
+
+    if (!container) return;
+
+    loadingMsg.style.display = "block";
+    noImagensMsg.style.display = "none";
+    container.innerHTML = ""; // Limpar (mas manter mensagens ocultas se possível, ou recriar)
+    container.appendChild(loadingMsg);
+    container.appendChild(noImagensMsg);
+
+    try {
+        // Usa a função exportada pelo services.js
+        const arquivos = await getArquivosServicoPorOrdemId(ordemId);
+
+        loadingMsg.style.display = "none";
+
+        if (arquivos && arquivos.length > 0) {
+            arquivos.forEach(arquivo => {
+                // Filtra apenas imagens para exibição direta, ou mostra link para outros
+                const itemDiv = document.createElement("div");
+                itemDiv.style.border = "1px solid #ddd";
+                itemDiv.style.padding = "5px";
+                itemDiv.style.borderRadius = "4px";
+                itemDiv.style.width = "150px";
+                itemDiv.style.textAlign = "center";
+
+                const nomeLower = arquivo.name.toLowerCase();
+                const isImage = nomeLower.match(/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i);
+
+                if (isImage) {
+                    const img = document.createElement("img");
+                    img.src = arquivo.url;
+                    img.alt = arquivo.name;
+                    img.style.maxWidth = "100%";
+                    img.style.height = "auto";
+                    img.style.cursor = "pointer";
+                    img.onclick = () => window.open(arquivo.url, "_blank");
+                    itemDiv.appendChild(img);
+                } else {
+                    const icon = document.createElement("div");
+                    icon.innerHTML = '<i class="fas fa-file" style="font-size: 48px; color: #666;"></i>';
+                    itemDiv.appendChild(icon);
+                }
+
+                const link = document.createElement("a");
+                link.href = arquivo.url;
+                link.target = "_blank";
+                link.textContent = arquivo.name;
+                link.style.display = "block";
+                link.style.marginTop = "5px";
+                link.style.fontSize = "12px";
+                link.style.overflow = "hidden";
+                link.style.textOverflow = "ellipsis";
+                link.style.whiteSpace = "nowrap";
+
+                itemDiv.appendChild(link);
+                container.appendChild(itemDiv);
+            });
+        } else {
+            noImagensMsg.style.display = "block";
+        }
+
+    } catch (error) {
+        console.error("Erro ao carregar imagens:", error);
+        loadingMsg.style.display = "none";
+        noImagensMsg.textContent = "Erro ao carregar imagens.";
+        noImagensMsg.style.display = "block";
+    }
+}

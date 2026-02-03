@@ -24,7 +24,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const btnFinalizado = document.getElementById("btnFinalizado");
   const btnPendenciasModal = document.getElementById("btnPendenciasModal");
   const informacoesTextarea = document.getElementById("informacoes");
-  const btnAbrirNotion = document.getElementById("btnAbrirNotion");
+  const btnEnviarAnexo = document.getElementById("btnEnviarAnexo");
+  const inputNovoAnexo = document.getElementById("novoAnexo");
   const arquivosServicoContainer = document.getElementById("arquivosServicoContainer");
   const listaArquivosServico = document.getElementById("listaArquivosServico");
   const loadingArquivosMsg = document.getElementById("loadingArquivosMsg");
@@ -692,6 +693,52 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
   }
 
+  // --- Botão Enviar Anexos ---
+  if (btnEnviarAnexo) {
+      btnEnviarAnexo.addEventListener("click", async () => {
+          const arquivos = inputNovoAnexo.files;
+          if (!arquivos || arquivos.length === 0) {
+              mostrarMensagem("Selecione pelo menos um arquivo.", "erro");
+              return;
+          }
+
+          try {
+              btnEnviarAnexo.disabled = true;
+              btnEnviarAnexo.textContent = "Enviando...";
+
+              // Upload um por um
+              for (let i = 0; i < arquivos.length; i++) {
+                  const arquivo = arquivos[i];
+                  const fileExt = arquivo.name.split('.').pop();
+                  const fileName = `${ordemId}/${Date.now()}_${i}.${fileExt}`;
+
+                  const { error: uploadError } = await supabaseClient.storage
+                      .from('os-files')
+                      .upload(fileName, arquivo);
+
+                  if (uploadError) throw uploadError;
+
+                  await supabaseClient.from('work_order_files').insert({
+                      work_order_id: ordemId,
+                      file_name: arquivo.name,
+                      storage_path: fileName
+                  });
+              }
+
+              mostrarMensagem("Arquivos enviados com sucesso!", "sucesso");
+              inputNovoAnexo.value = ""; // Limpar input
+              await carregarArquivosServico(ordemId); // Atualizar lista
+
+          } catch (error) {
+              console.error("Erro ao enviar anexos:", error);
+              mostrarMensagem("Erro ao enviar anexos.", "erro");
+          } finally {
+              btnEnviarAnexo.disabled = false;
+              btnEnviarAnexo.textContent = "Enviar Anexo(s)";
+          }
+      });
+  }
+
   // --- Carregamento de Dados e Arquivos (manter e adaptar) ---
   async function carregarDadosOS() {
     // ... (lógica original de carregarDadosOS)
@@ -785,13 +832,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         desabilitarEdicaoGeralOS(); 
       }
       
-      if(btnAbrirNotion && ordem.notionUrl) {
-        btnAbrirNotion.onclick = () => window.open(ordem.notionUrl, "_blank");
-        btnAbrirNotion.disabled = false;
-      } else if (btnAbrirNotion) {
-        btnAbrirNotion.disabled = true;
-        btnAbrirNotion.title = "Link do Notion não disponível para esta OS."; // ADIÇÃO: Tooltip
-      }
+      // Lógica de botão Notion removida em favor de upload direto
 
     } catch (error) {
       console.error("Erro detalhado ao carregar dados da OS:", error);

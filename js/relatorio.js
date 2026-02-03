@@ -953,71 +953,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     btnFecharArquivoModal.addEventListener("click", fecharModalArquivo);
   }
 
-  // --- Lógica de Login do Prestador (Bloqueio) ---
-  const modalLoginPrestador = document.getElementById("modalLoginPrestador");
-  const btnEntrarPrestador = document.getElementById("btnEntrarPrestador");
-  const prestadorLoginInput = document.getElementById("prestadorLogin");
-  const prestadorSenhaInput = document.getElementById("prestadorSenha");
-  const erroLoginPrestador = document.getElementById("erroLoginPrestador");
-
-  async function verificarAcessoPrestador() {
-      const urlParams = new URLSearchParams(window.location.search);
-      // Se tiver slug, é acesso público -> exige autenticação do prestador
-      if (urlParams.has("slug")) {
-          const sessaoPrestador = sessionStorage.getItem("providerAuth");
-          if (!sessaoPrestador) {
-              // Bloqueia a tela
-              if(modalLoginPrestador) modalLoginPrestador.style.display = "flex";
-              return false; // Não carrega dados ainda
-          }
-      }
-      return true; // Acesso liberado (interno ou já logado)
-  }
-
-  if (btnEntrarPrestador) {
-      btnEntrarPrestador.addEventListener("click", async () => {
-          const login = prestadorLoginInput.value.trim();
-          const senha = prestadorSenhaInput.value.trim();
-
-          if (!login || !senha) {
-              erroLoginPrestador.textContent = "Preencha login e senha.";
-              erroLoginPrestador.style.display = "block";
-              return;
-          }
-
-          btnEntrarPrestador.disabled = true;
-          btnEntrarPrestador.textContent = "Verificando...";
-
-          try {
-              // Chama RPC para validar (será criada no passo seguinte)
-              const { data, error } = await supabaseClient.rpc('validar_credenciais_prestador', {
-                  p_login: login,
-                  p_senha: senha
-              });
-
-              if (error) throw error;
-
-              if (data === true) {
-                  sessionStorage.setItem("providerAuth", "true");
-                  modalLoginPrestador.style.display = "none";
-                  await carregarDadosOS(); // Carrega os dados após login
-              } else {
-                  throw new Error("Credenciais inválidas");
-              }
-          } catch (err) {
-              console.error("Erro auth prestador:", err);
-              erroLoginPrestador.textContent = "Login ou senha incorretos.";
-              erroLoginPrestador.style.display = "block";
-              btnEntrarPrestador.disabled = false;
-              btnEntrarPrestador.textContent = "Acessar";
-          }
-      });
-  }
-
-  // Carregar dados da OS ao iniciar (somente se verificação passar)
-  if (await verificarAcessoPrestador()) {
-      await carregarDadosOS();
-  }
+  // Carregar dados da OS ao iniciar
+  await carregarDadosOS();
 
   // ADIÇÃO: Classe CSS para highlight de erro em inputs/selects
   // (Adicionar ao relatorio_enhancements.css ou similar)

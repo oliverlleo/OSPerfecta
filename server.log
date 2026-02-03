@@ -34,3 +34,13 @@
 127.0.0.1 - - [03/Feb/2026 21:14:16] "GET /js/config.js HTTP/1.1" 200 -
 127.0.0.1 - - [03/Feb/2026 21:14:16] "GET /js/reabrir_os_isolado.js HTTP/1.1" 200 -
 127.0.0.1 - - [03/Feb/2026 21:14:16] "GET /js/services.js HTTP/1.1" 200 -
+127.0.0.1 - - [03/Feb/2026 21:49:00] "GET /relatorio.html?slug=valid-token-123 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Feb/2026 21:49:00] "GET /css/styles.css HTTP/1.1" 200 -
+127.0.0.1 - - [03/Feb/2026 21:49:00] "GET /css/additional.css HTTP/1.1" 200 -
+127.0.0.1 - - [03/Feb/2026 21:49:00] "GET /css/relatorio_novo_layout.css HTTP/1.1" 200 -
+127.0.0.1 - - [03/Feb/2026 21:49:00] "GET /js/auth_guard.js HTTP/1.1" 200 -
+127.0.0.1 - - [03/Feb/2026 21:49:00] "GET /js/config.js HTTP/1.1" 200 -
+127.0.0.1 - - [03/Feb/2026 21:49:00] "GET /img/logo.png HTTP/1.1" 200 -
+127.0.0.1 - - [03/Feb/2026 21:49:00] "GET /css/relatorio_enhancements.css HTTP/1.1" 200 -
+127.0.0.1 - - [03/Feb/2026 21:49:00] "GET /js/services.js HTTP/1.1" 200 -
+127.0.0.1 - - [03/Feb/2026 21:49:00] "GET /js/relatorio.js HTTP/1.1" 200 -

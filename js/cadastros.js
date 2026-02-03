@@ -34,7 +34,7 @@ function toast(msg, tipo = 'success') {
 async function carregarClientes() {
     const busca = document.getElementById('buscaCliente').value.toLowerCase();
 
-    let query = supabase.from('clients').select('*').order('name');
+    let query = supabaseClient.from('clients').select('*').order('name');
     if (busca) query = query.ilike('name', `%${busca}%`);
 
     const { data, error } = await query;
@@ -62,7 +62,7 @@ async function carregarClientes() {
 }
 
 async function editarCliente(id) {
-    const { data, error } = await supabase.from('clients').select('*').eq('id', id).single();
+    const { data, error } = await supabaseClient.from('clients').select('*').eq('id', id).single();
     if (error) return toast('Erro ao buscar cliente', 'erro');
 
     document.getElementById('clienteId').value = data.id;
@@ -102,10 +102,10 @@ async function salvarCliente() {
     let novoId = id;
 
     if (id) {
-        const { error } = await supabase.from('clients').update(dados).eq('id', id);
+        const { error } = await supabaseClient.from('clients').update(dados).eq('id', id);
         if (error) return toast('Erro ao atualizar', 'erro');
     } else {
-        const { data, error } = await supabase.from('clients').insert(dados).select().single();
+        const { data, error } = await supabaseClient.from('clients').insert(dados).select().single();
         if (error) return toast('Erro ao criar', 'erro');
         novoId = data.id;
 
@@ -115,7 +115,7 @@ async function salvarCliente() {
         const locCid = document.getElementById('localRapidoCidade').value;
 
         if (locNome && locEnd && locCid) {
-            await supabase.from('client_locations').insert({
+            await supabaseClient.from('client_locations').insert({
                 client_id: novoId,
                 name: locNome,
                 address: locEnd,
@@ -136,7 +136,7 @@ async function carregarLocais() {
 
     // Atualizar dropdown de clientes se vazio
     if (document.getElementById('filtroLocalCliente').options.length <= 1) {
-        const { data: clientes } = await supabase.from('clients').select('id, name').order('name');
+        const { data: clientes } = await supabaseClient.from('clients').select('id, name').order('name');
         const select = document.getElementById('filtroLocalCliente');
         const selectModal = document.getElementById('localClienteId');
 
@@ -149,7 +149,7 @@ async function carregarLocais() {
         });
     }
 
-    let query = supabase.from('client_locations').select('*, clients(name)');
+    let query = supabaseClient.from('client_locations').select('*, clients(name)');
     if (busca) query = query.ilike('name', `%${busca}%`);
     if (filtroCliente) query = query.eq('client_id', filtroCliente);
 
@@ -192,7 +192,7 @@ function abrirModalLocal() {
 }
 
 async function editarLocal(id) {
-    const { data, error } = await supabase.from('client_locations').select('*').eq('id', id).single();
+    const { data, error } = await supabaseClient.from('client_locations').select('*').eq('id', id).single();
     if (error) return toast('Erro ao buscar local', 'erro');
 
     document.getElementById('localId').value = data.id;
@@ -218,10 +218,10 @@ async function salvarLocal() {
     const dados = { client_id, name, address, city, active, updated_at: new Date() };
 
     if (id) {
-        const { error } = await supabase.from('client_locations').update(dados).eq('id', id);
+        const { error } = await supabaseClient.from('client_locations').update(dados).eq('id', id);
         if (error) return toast('Erro ao atualizar', 'erro');
     } else {
-        const { error } = await supabase.from('client_locations').insert(dados);
+        const { error } = await supabaseClient.from('client_locations').insert(dados);
         if (error) return toast('Erro ao criar', 'erro');
     }
 
@@ -258,7 +258,7 @@ async function salvarPrestador() { genericSave('providers', 'Prestador'); }
 // --- Genéricos para tabelas simples (Nome/Ativo) ---
 async function genericLoad(table, tbodyId, editFunc, callbackName, searchInputId) {
     const busca = document.getElementById(searchInputId).value.toLowerCase();
-    let query = supabase.from(table).select('*').order('name');
+    let query = supabaseClient.from(table).select('*').order('name');
     if (busca) query = query.ilike('name', `%${busca}%`);
 
     const { data, error } = await query;
@@ -298,7 +298,7 @@ function genericOpenModal(type) {
 }
 
 async function genericEdit(table, id, type) {
-    const { data, error } = await supabase.from(table).select('*').eq('id', id).single();
+    const { data, error } = await supabaseClient.from(table).select('*').eq('id', id).single();
     if (error) return toast('Erro ao buscar', 'erro');
 
     const prefix = type.toLowerCase();
@@ -320,10 +320,10 @@ async function genericSave(table, type) {
     const dados = { name, active, updated_at: new Date() };
 
     if (id) {
-        const { error } = await supabase.from(table).update(dados).eq('id', id);
+        const { error } = await supabaseClient.from(table).update(dados).eq('id', id);
         if (error) return toast('Erro ao atualizar', 'erro');
     } else {
-        const { error } = await supabase.from(table).insert(dados);
+        const { error } = await supabaseClient.from(table).insert(dados);
         if (error) return toast('Erro ao criar', 'erro');
     }
 
@@ -338,7 +338,7 @@ async function genericSave(table, type) {
 async function toggleAtivo(table, id, currentStatus, callback) {
     if (!confirm('Tem certeza que deseja alterar o status?')) return;
 
-    const { error } = await supabase.from(table).update({ active: !currentStatus }).eq('id', id);
+    const { error } = await supabaseClient.from(table).update({ active: !currentStatus }).eq('id', id);
     if (error) return toast('Erro ao atualizar status', 'erro');
 
     toast('Status atualizado');

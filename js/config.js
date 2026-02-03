@@ -4,23 +4,30 @@
 const SUPABASE_URL = 'https://wlfwtwhojwckhqwcrujg.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsZnd0d2hvandja2hxd2NydWpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwNzc3MzksImV4cCI6MjA4NTY1MzczOX0.zfQlnEWyBzno9drxyVoN4e6TPM2vzEjT9dDWZBdDm_k';
 
-// Inicializa o cliente Supabase de forma segura
-// Certifique-se de que a biblioteca supabase-js foi carregada antes deste arquivo
-if (typeof supabase === 'undefined') {
-    if (typeof createClient !== 'undefined') {
-        var supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-    } else if (window.supabase && window.supabase.createClient) {
-        var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    } else {
-        console.error('Supabase SDK not loaded. Please include the script tag for @supabase/supabase-js.');
-    }
+// Inicializa o cliente Supabase globalmente como 'supabaseClient'
+// Isso evita conflito com a biblioteca 'supabase' que pode estar no window
+let supabaseClient;
+
+if (window.supabase && window.supabase.createClient) {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    console.log("Supabase Client initialized successfully.");
+} else if (typeof createClient !== 'undefined') {
+    // Fallback caso createClient esteja no escopo global
+    supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+    console.log("Supabase Client initialized via global createClient.");
+} else {
+    console.error('CRITICAL: Supabase SDK not loaded. Cannot initialize client.');
+    alert("Erro crítico: Sistema não conseguiu carregar o banco de dados. Recarregue a página.");
 }
+
+// Expor globalmente para garantia
+window.supabaseClient = supabaseClient;
 
 // Formatadores
 const formatarData = (dataString) => {
   if (!dataString) return '';
   // Se for YYYY-MM-DD
-  if (dataString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+  if (typeof dataString === 'string' && dataString.match(/^\d{4}-\d{2}-\d{2}$/)) {
       const parts = dataString.split('-');
       return `${parts[2]}/${parts[1]}/${parts[0]}`;
   }

@@ -138,7 +138,7 @@ async function getTiposServico() {
  * Auxiliar para buscar ID pelo Nome (se necessário)
  */
 async function getIdByName(table, name) {
-    const { data } = await supabase.from(table).select('id').eq('name', name).single();
+    const { data } = await supabaseClient.from(table).select('id').eq('name', name).single();
     return data ? data.id : null;
 }
 
@@ -204,7 +204,7 @@ async function criarOrdemServico(dados) {
                 }
             }
             if (providerInserts.length > 0) {
-                await supabase.from('work_order_providers').insert(providerInserts);
+                await supabaseClient.from('work_order_providers').insert(providerInserts);
             }
         }
 
@@ -352,7 +352,7 @@ async function getOrdemPorId(id) {
  */
 async function criarSlug(ordemId) {
     try {
-        const { data, error } = await supabase.rpc('create_share_link', { p_work_order_id: ordemId });
+        const { data, error } = await supabaseClient.rpc('create_share_link', { p_work_order_id: ordemId });
         if (error) throw error;
         return { slug: data };
     } catch (error) {
@@ -366,7 +366,7 @@ async function criarSlug(ordemId) {
  */
 async function getOrdemPorSlug(slug) {
     try {
-        const { data, error } = await supabase.rpc('get_work_order_by_token', { p_token: slug });
+        const { data, error } = await supabaseClient.rpc('get_work_order_by_token', { p_token: slug });
         if (error) throw error;
         if (!data) throw new Error("Ordem não encontrada");
 
@@ -487,9 +487,9 @@ async function salvarServicoIndividual(osId, servicoData) {
         // Se tiver ID, update
         let result;
         if (servicoData.id) {
-             result = await supabase.from('work_order_service_exec').update(payload).eq('id', servicoData.id);
+             result = await supabaseClient.from('work_order_service_exec').update(payload).eq('id', servicoData.id);
         } else {
-             result = await supabase.from('work_order_service_exec').insert(payload);
+             result = await supabaseClient.from('work_order_service_exec').insert(payload);
         }
 
         if (result.error) throw result.error;
@@ -646,12 +646,12 @@ async function atualizarOrdem(id, dados) {
         if (dados.tipoServico) payload.service_type_id = await getIdByName('service_types', dados.tipoServico);
         if (dados.responsavel) payload.responsible_id = await getIdByName('responsibles', dados.responsavel);
 
-        const { error } = await supabase.from('work_orders').update(payload).eq('id', id);
+        const { error } = await supabaseClient.from('work_orders').update(payload).eq('id', id);
         if (error) throw error;
 
         // Atualizar Prestadores (Delete + Insert)
         if (dados.prestadores) {
-            await supabase.from('work_order_providers').delete().eq('work_order_id', id);
+            await supabaseClient.from('work_order_providers').delete().eq('work_order_id', id);
 
             const providerInserts = [];
             for (const p of dados.prestadores) {
@@ -662,7 +662,7 @@ async function atualizarOrdem(id, dados) {
                 if (pId) providerInserts.push({ work_order_id: id, provider_id: pId });
             }
             if (providerInserts.length > 0) {
-                await supabase.from('work_order_providers').insert(providerInserts);
+                await supabaseClient.from('work_order_providers').insert(providerInserts);
             }
         }
         return { success: true };

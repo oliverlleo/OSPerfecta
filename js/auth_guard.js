@@ -3,17 +3,19 @@
 // Deve ser incluído APÓS config.js em todas as páginas protegidas
 
 (async function() {
-    // Evitar loop de redirecionamento se já estiver na página de login
-    if (window.location.pathname.endsWith('login.html')) {
+    // Evitar loop de redirecionamento se já estiver na página de login ou login de prestador
+    const path = window.location.pathname;
+    if (path.endsWith('login.html') || path.endsWith('login_prestador.html')) {
         return;
     }
 
     // Páginas públicas (ex: relatorio.html se acessado via token)
     // Se relatorio.html tiver ?slug=..., é público. Se tiver ?id=..., é privado.
-    if (window.location.pathname.endsWith('relatorio.html')) {
+    // Usar includes para ser mais robusto contra subdiretórios
+    if (path.includes('relatorio.html')) {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('slug')) {
-            return; // Acesso público permitido
+            return; // Acesso público permitido (validado depois pelo relatorio.js)
         }
     }
 

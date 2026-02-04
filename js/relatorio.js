@@ -836,8 +836,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     } catch (error) {
       console.error("Erro detalhado ao carregar dados da OS:", error);
-      mostrarMensagem(`Erro ao carregar dados da OS: ${error.message}`, "erro");
-      if(document.getElementById("dadosOS")) document.getElementById("dadosOS").style.display = "none";
+      // Mostrar erro na tela de forma persistente
+      const mainElement = document.querySelector("main");
+      if (mainElement) {
+          mainElement.innerHTML = `
+            <div style="text-align: center; padding: 50px; color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px; margin: 20px;">
+                <h2>Erro ao Carregar Relatório</h2>
+                <p>Não foi possível buscar os dados da Ordem de Serviço.</p>
+                <p><strong>Detalhe:</strong> ${error.message || error}</p>
+                <p><em>Verifique se o banco de dados (RPCs) foi configurado corretamente.</em></p>
+                <button onclick="window.location.reload()" class="btn btn-secondary mt-3">Tentar Novamente</button>
+            </div>
+          `;
+      } else {
+          mostrarMensagem(`Erro ao carregar dados da OS: ${error.message}`, "erro");
+      }
     }
   }
 

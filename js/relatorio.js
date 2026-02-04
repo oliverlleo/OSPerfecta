@@ -953,24 +953,39 @@ document.addEventListener("DOMContentLoaded", async () => {
     btnFecharArquivoModal.addEventListener("click", fecharModalArquivo);
   }
 
-  // --- Lógica de Login do Prestador (Redirecionamento) ---
-  async function verificarAcessoPrestador() {
+  // --- Lógica de Autenticação Híbrida (Staff vs Prestador) ---
+  async function verificarAcesso() {
       const urlParams = new URLSearchParams(window.location.search);
-      // Se tiver slug, é acesso público -> exige autenticação do prestador
+
+      // 1. Acesso Público / Prestador (via Slug)
       if (urlParams.has("slug")) {
           const sessaoPrestador = sessionStorage.getItem("providerAuth");
           if (!sessaoPrestador) {
               // Redireciona para login_prestador.html passando o slug
               const slug = urlParams.get("slug");
               window.location.href = `login_prestador.html?slug=${slug}`;
-              return false; // Não carrega dados ainda (embora o redirecionamento aconteça)
+              return false; // Bloqueia carregamento
           }
+          return true; // Autenticado como prestador
       }
-      return true; // Acesso liberado (interno ou já logado)
+
+      // 2. Acesso Interno / Staff (sem slug, ex: via ID)
+      else {
+          // Verifica sessão do Supabase (Staff)
+          if (!supabaseClient || !supabaseClient.auth) return false;
+
+          const { data: { session } } = await supabaseClient.auth.getSession();
+          if (!session) {
+              // Redireciona para login principal
+              window.location.href = 'login.html';
+              return false; // Bloqueia carregamento
+          }
+          return true; // Autenticado como staff
+      }
   }
 
   // Carregar dados da OS ao iniciar (somente se verificação passar)
-  if (await verificarAcessoPrestador()) {
+  if (await verificarAcesso()) {
       await carregarDadosOS();
   }
 

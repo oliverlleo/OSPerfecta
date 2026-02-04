@@ -3,21 +3,20 @@
 // Deve ser incluído APÓS config.js em todas as páginas protegidas
 
 (async function() {
-    // Evitar loop de redirecionamento se já estiver na página de login ou login de prestador
-    const path = window.location.pathname;
-    if (path.endsWith('login.html') || path.endsWith('login_prestador.html')) {
+    // 1. Regra Global: Se tiver "slug" na URL, é acesso público (provavelmente relatório ou login de prestador)
+    // Permitimos passar, pois a própria página vai validar o slug/token de prestador
+    if (window.location.search.includes('slug=')) {
         return;
     }
 
-    // Páginas públicas (ex: relatorio.html se acessado via token)
-    // Se relatorio.html tiver ?slug=..., é público. Se tiver ?id=..., é privado.
-    // Usar includes para ser mais robusto contra subdiretórios
-    if (path.includes('relatorio.html')) {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('slug')) {
-            return; // Acesso público permitido (validado depois pelo relatorio.js)
-        }
+    // 2. Páginas de Login estão liberadas
+    const path = window.location.pathname;
+    if (path.includes('login.html') || path.includes('login_prestador.html')) {
+        return;
     }
+
+    // 3. Relatório sem slug é privado (cai na regra de auth abaixo)
+    // Mas se tiver slug (tratado acima), passa.
 
     if (!supabaseClient || !supabaseClient.auth) {
         console.error("Supabase Client not ready for Auth Guard.");

@@ -209,3 +209,14 @@ OSError: [Errno 98] Address already in use
 127.0.0.1 - - [04/Feb/2026 10:29:58] "GET /js/relatorio.js HTTP/1.1" 200 -
 127.0.0.1 - - [04/Feb/2026 10:29:58] "GET /js/services.js HTTP/1.1" 200 -
 127.0.0.1 - - [04/Feb/2026 10:29:58] "GET /login_prestador.html?slug=test-slug HTTP/1.1" 200 -
+127.0.0.1 - - [04/Feb/2026 11:06:31] "GET /relatorio.html?slug=test-slug HTTP/1.1" 200 -
+127.0.0.1 - - [04/Feb/2026 11:06:32] "GET /css/styles.css HTTP/1.1" 200 -
+127.0.0.1 - - [04/Feb/2026 11:06:32] "GET /css/relatorio_enhancements.css HTTP/1.1" 200 -
+127.0.0.1 - - [04/Feb/2026 11:06:32] "GET /css/additional.css HTTP/1.1" 200 -
+127.0.0.1 - - [04/Feb/2026 11:06:32] "GET /img/logo.png HTTP/1.1" 200 -
+127.0.0.1 - - [04/Feb/2026 11:06:32] "GET /css/relatorio_novo_layout.css HTTP/1.1" 200 -
+127.0.0.1 - - [04/Feb/2026 11:06:32] "GET /js/config.js HTTP/1.1" 200 -
+127.0.0.1 - - [04/Feb/2026 11:06:32] "GET /js/auth_guard.js HTTP/1.1" 200 -
+127.0.0.1 - - [04/Feb/2026 11:06:32] "GET /js/services.js HTTP/1.1" 200 -
+127.0.0.1 - - [04/Feb/2026 11:06:32] "GET /js/relatorio.js HTTP/1.1" 200 -
+127.0.0.1 - - [04/Feb/2026 11:06:32] "GET /login_prestador.html?slug=test-slug HTTP/1.1" 200 -

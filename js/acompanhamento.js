@@ -54,7 +54,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const CACHE_ORDENS_DIA_KEY = "perfecta_cache_ordens_dia_v2";
   const CACHE_CLIENTES_KEY = "perfecta_cache_clientes_v2";
   const CACHE_TIMESTAMP_KEY = "perfecta_cache_timestamp";
-  const CACHE_EXPIRY_TIME = 24 * 60 * 60 * 1000; 
+  // Reduzido drasticamente para 5 minutos para evitar dados obsoletos
+  const CACHE_EXPIRY_TIME = 5 * 60 * 1000;
 
   let todasOrdensFiltradas = [];
   let ordensHoje = []; 

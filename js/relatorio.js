@@ -985,16 +985,50 @@ document.addEventListener("DOMContentLoaded", async () => {
       // 2. Acesso Interno / Staff (sem slug, ex: via ID)
       else {
           // Verifica sessão do Supabase (Staff)
-          if (!supabaseClient || !supabaseClient.auth) return false;
+          if (!supabaseClient || !supabaseClient.auth) {
+              mostrarLoginManual();
+              return false;
+          }
 
           const { data: { session } } = await supabaseClient.auth.getSession();
           if (!session) {
               // Redireciona para login principal (Staff)
-              window.location.href = 'login.html';
+              mostrarLoginManual();
               return false; // Bloqueia carregamento
           }
           return true; // Autenticado como staff
       }
+  }
+
+  function mostrarLoginManual() {
+      // Oculta o conteúdo principal para evitar flash
+      const mainContent = document.querySelector("main");
+      if (mainContent) mainContent.style.display = "none";
+
+      const overlay = document.createElement("div");
+      overlay.id = "loginOverlay";
+      overlay.style.position = "fixed";
+      overlay.style.top = "0";
+      overlay.style.left = "0";
+      overlay.style.width = "100%";
+      overlay.style.height = "100%";
+      overlay.style.backgroundColor = "#f4f4f4"; // Fundo sólido limpo
+      overlay.style.zIndex = "9999";
+      overlay.style.display = "flex";
+      overlay.style.flexDirection = "column";
+      overlay.style.justifyContent = "center";
+      overlay.style.alignItems = "center";
+      overlay.style.color = "#333";
+
+      overlay.innerHTML = `
+        <div class="text-center p-5 bg-white shadow rounded">
+            <h2 class="mb-3">Acesso Restrito</h2>
+            <p class="mb-4">Você precisa estar logado para visualizar este relatório.</p>
+            <a href="login.html" class="btn btn-primary btn-lg">Fazer Login</a>
+        </div>
+      `;
+
+      document.body.appendChild(overlay);
   }
 
   // Carregar dados da OS ao iniciar (somente se verificação passar)

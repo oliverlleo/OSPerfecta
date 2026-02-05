@@ -437,22 +437,41 @@ async function getOrdemPorSlug(slug) {
  */
 async function atualizarStatusOrdem(ordemId, dados) {
     try {
-        const updatePayload = {};
+        // Verificar se é acesso público (slug/token)
+        const urlParams = new URLSearchParams(window.location.search);
+        const slug = urlParams.get("slug");
 
-        if (dados.status) updatePayload.status = dados.status;
-        if (dados.dataInicio) updatePayload.started_at = dados.dataInicio;
-        if (dados.dataFim) updatePayload.finished_at = dados.dataFim;
-        if (dados.realizado) updatePayload.realizado_text = dados.realizado;
-        if (dados.pendencias) updatePayload.pendencias_text = dados.pendencias;
+        if (slug) {
+            // Usar RPC para acesso público
+            const { error } = await supabaseClient.rpc('update_work_order_by_token', {
+                p_token: slug,
+                p_status: dados.status || null,
+                p_started_at: dados.dataInicio || null,
+                p_finished_at: dados.dataFim || null,
+                p_realizado_text: dados.realizado || null,
+                p_pendencias_text: dados.pendencias || null
+            });
 
-        const { error } = await supabaseClient
-            .from('work_orders')
-            .update(updatePayload)
-            .eq('id', ordemId);
+            if (error) throw error;
+            return { success: true };
+        } else {
+            // Acesso autenticado (Staff)
+            const updatePayload = {};
 
-        if (error) throw error;
+            if (dados.status) updatePayload.status = dados.status;
+            if (dados.dataInicio) updatePayload.started_at = dados.dataInicio;
+            if (dados.dataFim) updatePayload.finished_at = dados.dataFim;
+            if (dados.realizado) updatePayload.realizado_text = dados.realizado;
+            if (dados.pendencias) updatePayload.pendencias_text = dados.pendencias;
 
-        return { success: true };
+            const { error } = await supabaseClient
+                .from('work_orders')
+                .update(updatePayload)
+                .eq('id', ordemId);
+
+            if (error) throw error;
+            return { success: true };
+        }
     } catch (error) {
         console.error("Erro ao atualizar status:", error);
         throw error;
@@ -490,24 +509,44 @@ async function finalizarOS(ordemId, statusFinal, informacoesAdicionais, servicos
  */
 async function salvarServicoIndividual(osId, servicoData) {
     try {
-        const payload = {
-            work_order_id: osId,
-            description: servicoData.descricao,
-            technicians: Array.isArray(servicoData.tecnicos) ? servicoData.tecnicos.join(', ') : servicoData.tecnicos,
-            status: servicoData.status,
-            note: servicoData.observacao,
-            updated_at: new Date()
-        };
+        // Verificar se é acesso público (slug/token)
+        const urlParams = new URLSearchParams(window.location.search);
+        const slug = urlParams.get("slug");
 
-        let result;
-        if (servicoData.id) {
-             result = await supabaseClient.from('work_order_service_exec').update(payload).eq('id', servicoData.id);
+        if (slug) {
+            // Usar RPC para acesso público
+            const { error } = await supabaseClient.rpc('save_service_exec_by_token', {
+                p_token: slug,
+                p_description: servicoData.descricao,
+                p_technicians: Array.isArray(servicoData.tecnicos) ? servicoData.tecnicos.join(', ') : servicoData.tecnicos,
+                p_status: servicoData.status,
+                p_note: servicoData.observacao || "",
+                p_service_exec_id: servicoData.id || null
+            });
+
+            if (error) throw error;
+            return { success: true };
         } else {
-             result = await supabaseClient.from('work_order_service_exec').insert(payload);
-        }
+            // Acesso autenticado (Staff)
+            const payload = {
+                work_order_id: osId,
+                description: servicoData.descricao,
+                technicians: Array.isArray(servicoData.tecnicos) ? servicoData.tecnicos.join(', ') : servicoData.tecnicos,
+                status: servicoData.status,
+                note: servicoData.observacao,
+                updated_at: new Date()
+            };
 
-        if (result.error) throw result.error;
-        return { success: true };
+            let result;
+            if (servicoData.id) {
+                 result = await supabaseClient.from('work_order_service_exec').update(payload).eq('id', servicoData.id);
+            } else {
+                 result = await supabaseClient.from('work_order_service_exec').insert(payload);
+            }
+
+            if (result.error) throw result.error;
+            return { success: true };
+        }
     } catch (error) {
         console.error("Erro ao salvar serviço individual:", error);
         throw error;

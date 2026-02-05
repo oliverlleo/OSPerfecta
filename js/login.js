@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const urlParams = new URLSearchParams(window.location.search);
     const loginType = urlParams.get("type");
     const slug = urlParams.get("slug");
+    const returnUrl = urlParams.get("returnUrl"); // Captura URL de retorno
 
     // Selecionar aba correta baseado na URL
     if (loginType === "provider" && tabPrestador) {
@@ -54,8 +55,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (error) throw error;
 
-                // Sucesso -> Redirecionar para home
-                window.location.href = "index.html";
+                // Sucesso -> Redirecionar
+                if (returnUrl) {
+                    window.location.href = decodeURIComponent(returnUrl);
+                } else {
+                    window.location.href = "index.html";
+                }
 
             } catch (error) {
                 console.error("Login erro:", error);
@@ -90,8 +95,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     sessionStorage.setItem("providerAuth", "true");
 
                     if (slug) {
+                        // Se tem slug, vai direto pro relatório com slug
                         window.location.href = `relatorio.html?slug=${slug}`;
+                    } else if (returnUrl) {
+                        // Se tem returnUrl genérico
+                        window.location.href = decodeURIComponent(returnUrl);
                     } else {
+                        // Sem destino?
                         mostrarErro("Login realizado, mas nenhum relatório especificado.");
                     }
                 } else {

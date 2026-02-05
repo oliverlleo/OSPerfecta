@@ -706,23 +706,10 @@ document.addEventListener("DOMContentLoaded", async () => {
               btnEnviarAnexo.disabled = true;
               btnEnviarAnexo.textContent = "Enviando...";
 
-              // Upload um por um
+              // Upload um por um via serviço
               for (let i = 0; i < arquivos.length; i++) {
                   const arquivo = arquivos[i];
-                  const fileExt = arquivo.name.split('.').pop();
-                  const fileName = `${ordemId}/${Date.now()}_${i}.${fileExt}`;
-
-                  const { error: uploadError } = await supabaseClient.storage
-                      .from('os-files')
-                      .upload(fileName, arquivo);
-
-                  if (uploadError) throw uploadError;
-
-                  await supabaseClient.from('work_order_files').insert({
-                      work_order_id: ordemId,
-                      file_name: arquivo.name,
-                      storage_path: fileName
-                  });
+                  await uploadArquivo(ordemId, arquivo);
               }
 
               mostrarMensagem("Arquivos enviados com sucesso!", "sucesso");
@@ -731,7 +718,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
           } catch (error) {
               console.error("Erro ao enviar anexos:", error);
-              mostrarMensagem("Erro ao enviar anexos.", "erro");
+              mostrarMensagem(`Erro ao enviar anexos: ${error.message || error}`, "erro");
           } finally {
               btnEnviarAnexo.disabled = false;
               btnEnviarAnexo.textContent = "Enviar Anexo(s)";
@@ -1020,11 +1007,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       overlay.style.alignItems = "center";
       overlay.style.color = "#333";
 
+      // Capturar URL atual para retorno
+      const currentUrl = encodeURIComponent(window.location.href);
+
       overlay.innerHTML = `
         <div class="text-center p-5 bg-white shadow rounded">
             <h2 class="mb-3">Acesso Restrito</h2>
             <p class="mb-4">Você precisa estar logado para visualizar este relatório.</p>
-            <a href="login.html" class="btn btn-primary btn-lg">Fazer Login</a>
+            <a href="login.html?returnUrl=${currentUrl}" class="btn btn-primary btn-lg">Fazer Login</a>
         </div>
       `;
 

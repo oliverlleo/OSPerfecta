@@ -974,9 +974,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (urlParams.has("slug")) {
           const sessaoPrestador = sessionStorage.getItem("providerAuth");
           if (!sessaoPrestador) {
-              // Redireciona para login_prestador.html passando o slug
+              // Redireciona para a tela de login principal, passando o slug e o tipo
               const slug = urlParams.get("slug");
-              window.location.href = `login_prestador.html?slug=${slug}`;
+              window.location.href = `login.html?type=provider&slug=${slug}`;
               return false; // Bloqueia carregamento
           }
           return true; // Autenticado como prestador
@@ -989,26 +989,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
           const { data: { session } } = await supabaseClient.auth.getSession();
           if (!session) {
-              // NÃO REDIRECIONAR AUTOMATICAMENTE. Mostrar opção na tela.
-              const mainElement = document.querySelector("main");
-              if (mainElement) {
-                  mainElement.innerHTML = `
-                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 60vh; text-align: center; padding: 20px;">
-                        <h2 style="color: #333; margin-bottom: 20px;">Acesso Necessário</h2>
-                        <p style="color: #666; margin-bottom: 30px; max-width: 500px;">Você está tentando acessar um relatório interno sem estar logado.</p>
-
-                        <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
-                            <a href="login.html" class="btn btn-primary" style="text-decoration: none; padding: 10px 20px; border-radius: 5px; background-color: #007bff; color: white;">
-                                Sou Funcionário (Login)
-                            </a>
-                        </div>
-                        <p style="margin-top: 20px; font-size: 0.9em; color: #888;">
-                            Se você é um <strong>Prestador</strong>, utilize o link completo enviado (com o código no final).
-                        </p>
-                    </div>
-                  `;
-              }
-              return false; // Bloqueia carregamento, mas MANTÉM na página
+              // Redireciona para login principal (Staff)
+              window.location.href = 'login.html';
+              return false; // Bloqueia carregamento
           }
           return true; // Autenticado como staff
       }

@@ -1,59 +1,109 @@
 // login.js
-document.addEventListener('DOMContentLoaded', () => {
-    const loginForm = document.getElementById('loginForm');
-    const emailInput = document.getElementById('email');
-    const passwordInput = document.getElementById('password');
-    const loginError = document.getElementById('loginError');
-    const btnLogin = document.getElementById('btnLogin');
+// Lógica para autenticação (Staff e Prestador)
 
-    // Verificar se já está logado
-    if (supabaseClient.auth) {
-        supabaseClient.auth.getSession().then(({ data: { session } }) => {
-            if (session) {
-                window.location.href = 'index.html';
+document.addEventListener("DOMContentLoaded", () => {
+    // Referências aos elementos
+    const formLogin = document.getElementById("loginForm");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const btnLogin = document.getElementById("btnLogin");
+    const loginError = document.getElementById("loginError");
+
+    const formLoginPrestador = document.getElementById("loginFormPrestador");
+    const prestadorLoginInput = document.getElementById("prestadorLogin");
+    const prestadorSenhaInput = document.getElementById("prestadorSenha");
+    const btnLoginPrestador = document.getElementById("btnLoginPrestador");
+
+    const tabAdmin = document.getElementById("tab-admin");
+    const tabPrestador = document.getElementById("tab-prestador");
+
+    // Obter parâmetros da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const loginType = urlParams.get("type");
+    const slug = urlParams.get("slug");
+
+    // Selecionar aba correta baseado na URL
+    if (loginType === "provider" && tabPrestador) {
+        const triggerEl = new bootstrap.Tab(tabPrestador);
+        triggerEl.show();
+    }
+
+    function mostrarErro(mensagem) {
+        loginError.textContent = mensagem;
+        loginError.style.display = "block";
+        setTimeout(() => loginError.style.display = "none", 5000);
+    }
+
+    // --- Login Staff (Supabase Auth) ---
+    if (formLogin) {
+        formLogin.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (!email || !password) return;
+
+            btnLogin.disabled = true;
+            btnLogin.textContent = "Entrando...";
+
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (error) throw error;
+
+                // Sucesso -> Redirecionar para home
+                window.location.href = "index.html";
+
+            } catch (error) {
+                console.error("Login erro:", error);
+                mostrarErro("Erro ao entrar: Verifique suas credenciais.");
+                btnLogin.disabled = false;
+                btnLogin.textContent = "Entrar";
             }
         });
     }
 
-    loginForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
+    // --- Login Prestador (RPC) ---
+    if (formLoginPrestador) {
+        formLoginPrestador.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const login = prestadorLoginInput.value.trim();
+            const senha = prestadorSenhaInput.value.trim();
 
-        const email = emailInput.value.trim();
-        const password = passwordInput.value.trim();
+            if (!login || !senha) return;
 
-        if (!email || !password) {
-            showError("Preencha todos os campos.");
-            return;
-        }
+            btnLoginPrestador.disabled = true;
+            btnLoginPrestador.textContent = "Verificando...";
 
-        btnLogin.disabled = true;
-        btnLogin.textContent = "Entrando...";
-        loginError.style.display = 'none';
+            try {
+                const { data, error } = await supabaseClient.rpc('validar_credenciais_prestador', {
+                    p_login: login,
+                    p_senha: senha
+                });
 
-        try {
-            const { data, error } = await supabaseClient.auth.signInWithPassword({
-                email: email,
-                password: password
-            });
+                if (error) throw error;
 
-            if (error) {
-                throw error;
+                if (data === true) {
+                    sessionStorage.setItem("providerAuth", "true");
+
+                    if (slug) {
+                        window.location.href = `relatorio.html?slug=${slug}`;
+                    } else {
+                        mostrarErro("Login realizado, mas nenhum relatório especificado.");
+                    }
+                } else {
+                    throw new Error("Credenciais inválidas");
+                }
+
+            } catch (error) {
+                console.error("Login Prestador erro:", error);
+                mostrarErro("Login ou senha incorretos.");
+                btnLoginPrestador.disabled = false;
+                btnLoginPrestador.textContent = "Acessar Relatório";
             }
-
-            if (data.session) {
-                // Sucesso
-                window.location.href = 'index.html';
-            }
-        } catch (error) {
-            console.error("Erro login:", error);
-            showError("Falha no login: " + (error.message === "Invalid login credentials" ? "Credenciais inválidas" : error.message));
-            btnLogin.disabled = false;
-            btnLogin.textContent = "Entrar";
-        }
-    });
-
-    function showError(msg) {
-        loginError.textContent = msg;
-        loginError.style.display = 'block';
+        });
     }
 });

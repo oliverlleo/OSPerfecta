@@ -989,9 +989,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 
           const { data: { session } } = await supabaseClient.auth.getSession();
           if (!session) {
-              // Redireciona para login principal
-              window.location.href = 'login.html';
-              return false; // Bloqueia carregamento
+              // NÃO REDIRECIONAR AUTOMATICAMENTE. Mostrar opção na tela.
+              const mainElement = document.querySelector("main");
+              if (mainElement) {
+                  mainElement.innerHTML = `
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 60vh; text-align: center; padding: 20px;">
+                        <h2 style="color: #333; margin-bottom: 20px;">Acesso Necessário</h2>
+                        <p style="color: #666; margin-bottom: 30px; max-width: 500px;">Você está tentando acessar um relatório interno sem estar logado.</p>
+
+                        <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
+                            <a href="login.html" class="btn btn-primary" style="text-decoration: none; padding: 10px 20px; border-radius: 5px; background-color: #007bff; color: white;">
+                                Sou Funcionário (Login)
+                            </a>
+                        </div>
+                        <p style="margin-top: 20px; font-size: 0.9em; color: #888;">
+                            Se você é um <strong>Prestador</strong>, utilize o link completo enviado (com o código no final).
+                        </p>
+                    </div>
+                  `;
+              }
+              return false; // Bloqueia carregamento, mas MANTÉM na página
           }
           return true; // Autenticado como staff
       }

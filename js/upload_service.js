@@ -19,11 +19,21 @@ async function uploadArquivo(ordemId, arquivo) {
         // 2. Registrar no Banco
         const urlParams = new URLSearchParams(window.location.search);
         const slug = urlParams.get("slug");
+        const providerId = localStorage.getItem("provider_id");
 
         if (slug) {
             // Usar RPC para registrar via Token
             const { error } = await supabaseClient.rpc('register_file_by_token', {
                 p_token: slug,
+                p_file_name: arquivo.name,
+                p_storage_path: fileName
+            });
+            if (error) throw error;
+        } else if (providerId) {
+            // Usar RPC para registrar via Provider ID
+             const { error } = await supabaseClient.rpc('register_file_for_provider', {
+                p_work_order_id: ordemId,
+                p_provider_id: providerId,
                 p_file_name: arquivo.name,
                 p_storage_path: fileName
             });

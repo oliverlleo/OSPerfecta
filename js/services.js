@@ -351,22 +351,72 @@ async function getOrdensPorData(dataStr) {
  */
 async function getOrdemPorId(id) {
     try {
-        const { data, error } = await supabaseClient
-            .from('work_orders')
-            .select(`
-                *,
-                clients(name),
-                client_locations(name, address, city),
-                service_types(name),
-                responsibles(name),
-                work_order_providers(providers(name)),
-                work_order_service_exec(*)
-            `)
-            .eq('id', id)
-            .single();
+        // Verificar se é acesso por Prestador (via localStorage)
+        const providerId = localStorage.getItem("provider_id");
 
-        if (error) throw error;
-        return mapOsToLegacy(data);
+        // Prioridade: Session (Staff) > Provider (PIN)
+        const { data: { session } } = await supabaseClient.auth.getSession();
+
+        if (!session && providerId) {
+            // Acesso Prestador via RPC
+            console.log("[Services] Buscando OS via Provider RPC:", id, providerId);
+            const { data, error } = await supabaseClient.rpc('get_work_order_for_provider', {
+                p_work_order_id: id,
+                p_provider_id: providerId
+            });
+
+            if (error) throw error;
+            if (!data) throw new Error("Ordem não encontrada ou acesso negado ao prestador.");
+
+            // Mapear retorno do RPC (mesma estrutura do get_work_order_by_token)
+            const wo = data.work_order;
+            const result = {
+                id: wo.id,
+                numeroOS: wo.os_number,
+                cliente: data.client?.name,
+                clienteNome: data.client?.name,
+                localNome: data.location?.name,
+                endereco: data.location?.address,
+                localEndereco: data.location?.address,
+                clienteEndereco: data.location?.address,
+                cidade: data.location?.city,
+                localCidade: data.location?.city,
+                clienteCidade: data.location?.city,
+                status: wo.status,
+                agendamentoInicial: wo.scheduled_start,
+                agendamentoFinal: wo.scheduled_end,
+                responsavel: data.responsible?.name,
+                tipoServico: data.service_type?.name,
+                servicos: wo.services_text,
+                observacoes: wo.observations_text,
+                prestadores: (data.providers || []).map(p => p.name),
+                inicioServico: wo.started_at,
+                dataFinalizado: wo.finished_at,
+                realizado: wo.realizado_text,
+                pendencias: wo.pendencias_text,
+                servicosExecutados: data.service_exec || []
+            };
+            return result;
+
+        } else {
+            // Acesso Staff Padrão
+            const { data, error } = await supabaseClient
+                .from('work_orders')
+                .select(`
+                    *,
+                    clients(name),
+                    client_locations(name, address, city),
+                    service_types(name),
+                    responsibles(name),
+                    work_order_providers(providers(name)),
+                    work_order_service_exec(*)
+                `)
+                .eq('id', id)
+                .single();
+
+            if (error) throw error;
+            return mapOsToLegacy(data);
+        }
     } catch (error) {
         console.error("Erro ao buscar ordem por ID:", error);
         throw error;
@@ -437,12 +487,13 @@ async function getOrdemPorSlug(slug) {
  */
 async function atualizarStatusOrdem(ordemId, dados) {
     try {
-        // Verificar se é acesso público (slug/token)
+        // Verificar contexto de acesso
         const urlParams = new URLSearchParams(window.location.search);
         const slug = urlParams.get("slug");
+        const providerId = localStorage.getItem("provider_id");
 
         if (slug) {
-            // Usar RPC para acesso público
+            // Usar RPC para acesso público (Link)
             const { error } = await supabaseClient.rpc('update_work_order_by_token', {
                 p_token: slug,
                 p_status: dados.status || null,
@@ -451,9 +502,23 @@ async function atualizarStatusOrdem(ordemId, dados) {
                 p_realizado_text: dados.realizado || null,
                 p_pendencias_text: dados.pendencias || null
             });
-
             if (error) throw error;
             return { success: true };
+
+        } else if (providerId) {
+             // Usar RPC para acesso Prestador (ID)
+             const { error } = await supabaseClient.rpc('update_work_order_for_provider', {
+                p_work_order_id: ordemId,
+                p_provider_id: providerId,
+                p_status: dados.status || null,
+                p_started_at: dados.dataInicio || null,
+                p_finished_at: dados.dataFim || null,
+                p_realizado_text: dados.realizado || null,
+                p_pendencias_text: dados.pendencias || null
+             });
+             if (error) throw error;
+             return { success: true };
+
         } else {
             // Acesso autenticado (Staff)
             const updatePayload = {};
@@ -509,12 +574,13 @@ async function finalizarOS(ordemId, statusFinal, informacoesAdicionais, servicos
  */
 async function salvarServicoIndividual(osId, servicoData) {
     try {
-        // Verificar se é acesso público (slug/token)
+        // Verificar contexto
         const urlParams = new URLSearchParams(window.location.search);
         const slug = urlParams.get("slug");
+        const providerId = localStorage.getItem("provider_id");
 
         if (slug) {
-            // Usar RPC para acesso público
+            // RPC Token
             const { error } = await supabaseClient.rpc('save_service_exec_by_token', {
                 p_token: slug,
                 p_description: servicoData.descricao,
@@ -523,9 +589,23 @@ async function salvarServicoIndividual(osId, servicoData) {
                 p_note: servicoData.observacao || "",
                 p_service_exec_id: servicoData.id || null
             });
-
             if (error) throw error;
             return { success: true };
+
+        } else if (providerId) {
+            // RPC Provider
+            const { error } = await supabaseClient.rpc('save_service_exec_for_provider', {
+                p_work_order_id: osId,
+                p_provider_id: providerId,
+                p_description: servicoData.descricao,
+                p_technicians: Array.isArray(servicoData.tecnicos) ? servicoData.tecnicos.join(', ') : servicoData.tecnicos,
+                p_status: servicoData.status,
+                p_note: servicoData.observacao || "",
+                p_service_exec_id: servicoData.id || null
+            });
+            if (error) throw error;
+            return { success: true };
+
         } else {
             // Acesso autenticado (Staff)
             const payload = {

@@ -91,8 +91,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (error) throw error;
 
-                if (data === true) {
+                // Agora 'data' é um objeto JSON { id, name, success }
+                // Ou boolean 'true' (se a migration não tiver rodado ainda, fallback)
+                let success = false;
+                let providerId = null;
+                let providerName = null;
+
+                if (typeof data === 'boolean') {
+                    success = data;
+                } else if (data && data.success) {
+                    success = true;
+                    providerId = data.id;
+                    providerName = data.name;
+                }
+
+                if (success) {
                     sessionStorage.setItem("providerAuth", "true");
+                    // Armazena ID do prestador para sessão global
+                    if (providerId) {
+                        localStorage.setItem("provider_id", providerId);
+                        localStorage.setItem("provider_name", providerName || "Prestador");
+                    }
 
                     if (slug) {
                         // Se tem slug, vai direto pro relatório com slug
@@ -101,8 +120,11 @@ document.addEventListener("DOMContentLoaded", () => {
                         // Se tem returnUrl genérico
                         window.location.href = decodeURIComponent(returnUrl);
                     } else {
-                        // Sem destino?
-                        mostrarErro("Login realizado, mas nenhum relatório especificado.");
+                        // Sem destino específico, mas logado com sucesso
+                        // Se tentarmos acessar uma OS por ID, o relatorio.js agora vai usar o provider_id
+                        // Então podemos mandar para o dashboard ou pedir um ID.
+                        // Como não temos dashboard de prestador, mandamos para o returnUrl se existir, ou mensagem.
+                        mostrarErro("Login realizado! Acesse um link de relatório.");
                     }
                 } else {
                     throw new Error("Credenciais inválidas");

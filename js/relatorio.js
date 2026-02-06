@@ -971,6 +971,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       // 2. Acesso Interno / Staff (sem slug, ex: via ID)
       else {
+          // Verifica se é um PRESTADOR logado (Sessão PIN Local)
+          const providerId = localStorage.getItem("provider_id");
+          if (providerId) {
+              console.log("[Auth] Acesso permitido via Sessão de Prestador:", providerId);
+              return true;
+          }
+
           // Verifica sessão do Supabase (Staff)
           if (!supabaseClient || !supabaseClient.auth) {
               mostrarLoginManual();

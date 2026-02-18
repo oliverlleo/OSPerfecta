@@ -22,6 +22,7 @@ ALTER TABLE public.provider_sessions ENABLE ROW LEVEL SECURITY;
 
 
 -- 3. Function: Provider Login (Creates Session)
+-- Parameter names match exactly what is sent from JS: p_login, p_pin
 CREATE OR REPLACE FUNCTION public.provider_login(p_login text, p_pin text)
 RETURNS json
 LANGUAGE plpgsql
@@ -338,3 +339,7 @@ $$;
 GRANT EXECUTE ON FUNCTION public.register_file_for_provider_session(uuid, text, text, text) TO anon;
 GRANT EXECUTE ON FUNCTION public.register_file_for_provider_session(uuid, text, text, text) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.register_file_for_provider_session(uuid, text, text, text) TO service_role;
+
+
+-- 10. Reload Schema Cache
+NOTIFY pgrst, 'reload schema';

@@ -258,7 +258,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         <td><span class="status-badge ${statusClass}">${ordem.status}</span></td>
         <td class="action-buttons">
           <a href="relatorio.html?id=${ordem.id}" class="btn btn-primary btn-action">Ver</a>
-          <button class="btn btn-secondary btn-action copiar-link" data-id="${ordem.id}">Copiar Link</button>
+          <button class="btn btn-secondary btn-action copiar-link" data-id="${ordem.id}">Link do Prestador</button>
         </td>
       `;
       fragmento.appendChild(tr);

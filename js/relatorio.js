@@ -956,41 +956,44 @@ document.addEventListener("DOMContentLoaded", async () => {
   // --- Lógica de Autenticação Híbrida (Staff vs Prestador) ---
   async function verificarAcesso() {
       const urlParams = new URLSearchParams(window.location.search);
+      const currentUrl = encodeURIComponent(window.location.href);
 
       // 1. Acesso Público / Prestador (via Slug)
       if (urlParams.has("slug")) {
           const sessaoPrestador = sessionStorage.getItem("providerAuth");
-          if (!sessaoPrestador) {
-              // Redireciona para a tela de login principal, passando o slug e o tipo
+          const providerId = localStorage.getItem("provider_id");
+
+          // Aceitar se tiver auth de sessão OU provider_id local (fallback)
+          if (sessaoPrestador || providerId) {
+              return true; // Autenticado como prestador
+          } else {
+              // Redireciona para login de prestador com slug e returnUrl
               const slug = urlParams.get("slug");
-              window.location.href = `login.html?type=provider&slug=${slug}`;
+              window.location.href = `login.html?type=provider&slug=${slug}&returnUrl=${currentUrl}`;
               return false; // Bloqueia carregamento
           }
-          return true; // Autenticado como prestador
       }
 
       // 2. Acesso Interno / Staff (sem slug, ex: via ID)
       else {
-          // Verifica se é um PRESTADOR logado (Sessão PIN Local)
+          // A) Verifica se é um PRESTADOR logado (Sessão PIN Local)
           const providerId = localStorage.getItem("provider_id");
           if (providerId) {
               console.log("[Auth] Acesso permitido via Sessão de Prestador:", providerId);
               return true;
           }
 
-          // Verifica sessão do Supabase (Staff)
-          if (!supabaseClient || !supabaseClient.auth) {
-              mostrarLoginManual();
-              return false;
+          // B) Verifica sessão do Supabase (Staff)
+          if (supabaseClient && supabaseClient.auth) {
+              const { data: { session } } = await supabaseClient.auth.getSession();
+              if (session) {
+                  return true; // Autenticado como staff
+              }
           }
 
-          const { data: { session } } = await supabaseClient.auth.getSession();
-          if (!session) {
-              // Redireciona para login principal (Staff)
-              mostrarLoginManual();
-              return false; // Bloqueia carregamento
-          }
-          return true; // Autenticado como staff
+          // C) Se não logado em nada, mostrar overlay com escolha
+          mostrarLoginManual();
+          return false; // Bloqueia carregamento
       }
   }
 
@@ -1006,7 +1009,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       overlay.style.left = "0";
       overlay.style.width = "100%";
       overlay.style.height = "100%";
-      overlay.style.backgroundColor = "#f4f4f4"; // Fundo sólido limpo
+      overlay.style.backgroundColor = "#f4f4f4";
       overlay.style.zIndex = "9999";
       overlay.style.display = "flex";
       overlay.style.flexDirection = "column";
@@ -1014,17 +1017,22 @@ document.addEventListener("DOMContentLoaded", async () => {
       overlay.style.alignItems = "center";
       overlay.style.color = "#333";
 
-      // Capturar URL atual para retorno
       const currentUrl = encodeURIComponent(window.location.href);
 
       overlay.innerHTML = `
-        <div class="text-center p-5 bg-white shadow rounded">
-            <h2 class="mb-3">Acesso Restrito</h2>
-            <p class="mb-4">Você precisa estar logado para visualizar este relatório.</p>
-            <a href="login.html?returnUrl=${currentUrl}" class="btn btn-primary btn-lg">Fazer Login</a>
+        <div class="text-center p-5 bg-white shadow rounded" style="max-width:520px;">
+          <h2 class="mb-3">Acesso ao Relatório</h2>
+          <p class="mb-4">Escolha como deseja acessar:</p>
+          <div class="d-grid gap-2">
+            <a href="login.html?type=provider&returnUrl=${currentUrl}" class="btn btn-success btn-lg">
+              Sou Prestador (Login + PIN)
+            </a>
+            <a href="login.html?returnUrl=${currentUrl}" class="btn btn-primary btn-lg">
+              Sou Funcionário (Email + Senha)
+            </a>
+          </div>
         </div>
       `;
-
       document.body.appendChild(overlay);
   }
 

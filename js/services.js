@@ -351,18 +351,22 @@ async function getOrdensPorData(dataStr) {
  */
 async function getOrdemPorId(id) {
     try {
-        // Verificar se é acesso por Prestador (via localStorage)
-        const providerId = localStorage.getItem("provider_id");
+        // Verificar se é acesso por Prestador (via Session Token)
+        const providerToken = sessionStorage.getItem("provider_session_token");
 
-        // Prioridade: Session (Staff) > Provider (PIN)
-        const { data: { session } } = await supabaseClient.auth.getSession();
+        // Prioridade: Session (Staff) > Provider (Session Token)
+        let session = null;
+        if (supabaseClient.auth) {
+             const { data } = await supabaseClient.auth.getSession();
+             session = data.session;
+        }
 
-        if (!session && providerId) {
-            // Acesso Prestador via RPC
-            console.log("[Services] Buscando OS via Provider RPC:", id, providerId);
-            const { data, error } = await supabaseClient.rpc('get_work_order_for_provider', {
+        if (!session && providerToken) {
+            // Acesso Prestador via RPC Seguro (Sessão)
+            console.log("[Services] Buscando OS via Provider Session RPC:", id);
+            const { data, error } = await supabaseClient.rpc('get_work_order_for_provider_session', {
                 p_work_order_id: id,
-                p_provider_id: providerId
+                p_session_token: providerToken
             });
 
             if (error) throw error;
@@ -490,7 +494,7 @@ async function atualizarStatusOrdem(ordemId, dados) {
         // Verificar contexto de acesso
         const urlParams = new URLSearchParams(window.location.search);
         const slug = urlParams.get("slug");
-        const providerId = localStorage.getItem("provider_id");
+        const providerToken = sessionStorage.getItem("provider_session_token");
 
         if (slug) {
             // Usar RPC para acesso público (Link)
@@ -505,11 +509,11 @@ async function atualizarStatusOrdem(ordemId, dados) {
             if (error) throw error;
             return { success: true };
 
-        } else if (providerId) {
-             // Usar RPC para acesso Prestador (ID)
-             const { error } = await supabaseClient.rpc('update_work_order_for_provider', {
+        } else if (providerToken) {
+             // Usar RPC para acesso Prestador (Session Token)
+             const { error } = await supabaseClient.rpc('update_work_order_for_provider_session', {
                 p_work_order_id: ordemId,
-                p_provider_id: providerId,
+                p_session_token: providerToken,
                 p_status: dados.status || null,
                 p_started_at: dados.dataInicio || null,
                 p_finished_at: dados.dataFim || null,
@@ -577,7 +581,7 @@ async function salvarServicoIndividual(osId, servicoData) {
         // Verificar contexto
         const urlParams = new URLSearchParams(window.location.search);
         const slug = urlParams.get("slug");
-        const providerId = localStorage.getItem("provider_id");
+        const providerToken = sessionStorage.getItem("provider_session_token");
 
         if (slug) {
             // RPC Token
@@ -592,11 +596,11 @@ async function salvarServicoIndividual(osId, servicoData) {
             if (error) throw error;
             return { success: true };
 
-        } else if (providerId) {
-            // RPC Provider
-            const { error } = await supabaseClient.rpc('save_service_exec_for_provider', {
+        } else if (providerToken) {
+            // RPC Provider Session
+            const { error } = await supabaseClient.rpc('save_service_exec_for_provider_session', {
                 p_work_order_id: osId,
-                p_provider_id: providerId,
+                p_session_token: providerToken,
                 p_description: servicoData.descricao,
                 p_technicians: Array.isArray(servicoData.tecnicos) ? servicoData.tecnicos.join(', ') : servicoData.tecnicos,
                 p_status: servicoData.status,

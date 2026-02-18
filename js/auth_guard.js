@@ -3,20 +3,25 @@
 // Deve ser incluído APÓS config.js em todas as páginas protegidas
 
 (async function() {
-    // 1. Regra Global: Se tiver "slug" na URL, é acesso público (provavelmente relatório ou login de prestador)
-    // Permitimos passar, pois a própria página vai validar o slug/token de prestador
-    if (window.location.search.includes('slug=')) {
-        return;
-    }
-
-    // 2. Páginas de Login estão liberadas
     const path = window.location.pathname;
-    if (path.includes('login.html') || path.includes('login_prestador.html')) {
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // 1. Login e Slug liberados (a lógica de validação é interna nessas páginas)
+    if (path.includes('login.html') || urlParams.has('slug')) {
         return;
     }
 
-    // 3. Relatório sem slug é privado (cai na regra de auth abaixo)
-    // Mas se tiver slug (tratado acima), passa.
+    // 2. Relatório:
+    // O relatorio.html agora gerencia sua própria autenticação híbrida (Staff vs Prestador).
+    // O auth_guard não deve interferir se estivermos no relatório.
+    if (path.includes('relatorio.html')) {
+        return;
+    }
+
+    // 3. Demais Páginas (Admin/Staff apenas):
+    // Ex: index.html, acompanhamento.html, cadastros.html
+    // Exige sessão Supabase Auth (Email/Senha).
+    // Prestadores (Token de Sessão) NÃO PODEM acessar estas páginas.
 
     if (!supabaseClient || !supabaseClient.auth) {
         console.error("Supabase Client not ready for Auth Guard.");
@@ -25,12 +30,13 @@
 
     try {
         const { data: { session } } = await supabaseClient.auth.getSession();
+
         if (!session) {
-            console.warn("Usuário não autenticado. Redirecionando para login...");
-            // Salvar URL de retorno? Pode ser uma melhoria futura.
+            console.warn("[Auth Guard] Acesso negado. Usuário não é Staff.");
+            // Se for prestador tentando acessar área restrita, manda pro login
             window.location.href = 'login.html';
         } else {
-            console.log("Sessão válida encontrada.");
+            console.log("[Auth Guard] Sessão Staff válida.");
         }
 
         // Listener para logout

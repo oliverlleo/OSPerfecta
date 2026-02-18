@@ -84,34 +84,22 @@ document.addEventListener("DOMContentLoaded", () => {
             btnLoginPrestador.textContent = "Verificando...";
 
             try {
-                const { data, error } = await supabaseClient.rpc('validar_credenciais_prestador', {
+                // CALL NEW RPC: provider_login (returns token)
+                const { data, error } = await supabaseClient.rpc('provider_login', {
                     p_login: login,
-                    p_senha: senha
+                    p_pin: senha
                 });
 
                 if (error) throw error;
 
-                // Agora 'data' é um objeto JSON { id, name, success }
-                // Ou boolean 'true' (se a migration não tiver rodado ainda, fallback)
-                let success = false;
-                let providerId = null;
-                let providerName = null;
+                if (data && data.success) {
+                    // STORE TOKEN IN SESSION STORAGE
+                    // (Not LocalStorage, per requirements)
+                    sessionStorage.setItem("provider_session_token", data.token);
+                    sessionStorage.setItem("provider_name", data.provider_name || "Prestador");
 
-                if (typeof data === 'boolean') {
-                    success = data;
-                } else if (data && data.success) {
-                    success = true;
-                    providerId = data.id;
-                    providerName = data.name;
-                }
-
-                if (success) {
-                    sessionStorage.setItem("providerAuth", "true");
-                    // Armazena ID do prestador para sessão global
-                    if (providerId) {
-                        localStorage.setItem("provider_id", providerId);
-                        localStorage.setItem("provider_name", providerName || "Prestador");
-                    }
+                    // Clear old localStorage if exists to avoid confusion
+                    localStorage.removeItem("provider_id");
 
                     if (slug) {
                         // Se tem slug, vai direto pro relatório com slug
@@ -120,11 +108,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         // Se tem returnUrl genérico
                         window.location.href = decodeURIComponent(returnUrl);
                     } else {
-                        // Sem destino específico, mas logado com sucesso
-                        // Se tentarmos acessar uma OS por ID, o relatorio.js agora vai usar o provider_id
-                        // Então podemos mandar para o dashboard ou pedir um ID.
-                        // Como não temos dashboard de prestador, mandamos para o returnUrl se existir, ou mensagem.
-                        mostrarErro("Login realizado! Acesse um link de relatório.");
+                        // Sem destino específico.
+                        mostrarErro("Login realizado! Abra o link do relatório novamente.");
                     }
                 } else {
                     throw new Error("Credenciais inválidas");

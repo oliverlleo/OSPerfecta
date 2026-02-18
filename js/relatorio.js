@@ -958,42 +958,39 @@ document.addEventListener("DOMContentLoaded", async () => {
       const urlParams = new URLSearchParams(window.location.search);
       const currentUrl = encodeURIComponent(window.location.href);
 
-      // 1. Acesso Público / Prestador (via Slug)
-      if (urlParams.has("slug")) {
-          const sessaoPrestador = sessionStorage.getItem("providerAuth");
-          const providerId = localStorage.getItem("provider_id");
-
-          // Aceitar se tiver auth de sessão OU provider_id local (fallback)
-          if (sessaoPrestador || providerId) {
-              return true; // Autenticado como prestador
-          } else {
-              // Redireciona para login de prestador com slug e returnUrl
-              const slug = urlParams.get("slug");
-              window.location.href = `login.html?type=provider&slug=${slug}&returnUrl=${currentUrl}`;
-              return false; // Bloqueia carregamento
+      // 1. Verificar Sessão Staff (Prioridade)
+      if (supabaseClient && supabaseClient.auth) {
+          const { data: { session } } = await supabaseClient.auth.getSession();
+          if (session) {
+              return true; // Autenticado como staff
           }
       }
 
-      // 2. Acesso Interno / Staff (sem slug, ex: via ID)
-      else {
-          // A) Verifica se é um PRESTADOR logado (Sessão PIN Local)
-          const providerId = localStorage.getItem("provider_id");
-          if (providerId) {
-              console.log("[Auth] Acesso permitido via Sessão de Prestador:", providerId);
+      // 2. Verificar Sessão Prestador (Session Token)
+      const token = sessionStorage.getItem("provider_session_token");
+      if (token) {
+          // Validar token no servidor
+          const { data, error } = await supabaseClient.rpc('provider_validate_session', { p_token: token });
+          if (!error && data && data.valid) {
+              console.log("[Auth] Acesso permitido via Sessão de Prestador Válida.");
               return true;
+          } else {
+              // Token inválido ou expirado
+              console.warn("[Auth] Sessão de prestador inválida ou expirada.");
+              sessionStorage.removeItem("provider_session_token");
           }
+      }
 
-          // B) Verifica sessão do Supabase (Staff)
-          if (supabaseClient && supabaseClient.auth) {
-              const { data: { session } } = await supabaseClient.auth.getSession();
-              if (session) {
-                  return true; // Autenticado como staff
-              }
-          }
-
-          // C) Se não logado em nada, mostrar overlay com escolha
+      // 3. Se não autenticado
+      if (urlParams.has("slug")) {
+          // Se tem slug, redireciona direto para Login Prestador
+          const slug = urlParams.get("slug");
+          window.location.href = `login.html?type=provider&slug=${slug}&returnUrl=${currentUrl}`;
+          return false;
+      } else {
+          // Se não tem slug (acesso por ID), mostra overlay de escolha
           mostrarLoginManual();
-          return false; // Bloqueia carregamento
+          return false;
       }
   }
 

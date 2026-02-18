@@ -244,6 +244,18 @@ async function criarOrdemServico(dados) {
 /**
  * Mapeia OS do Supabase para formato legado
  */
+function mapServiceExecToRelatorio(list) {
+  return (list || []).map(se => ({
+    id: se.id,
+    descricao: se.descricao ?? se.description ?? "",
+    tecnicos: Array.isArray(se.tecnicos)
+      ? se.tecnicos
+      : (se.technicians ? se.technicians.split(",").map(t => t.trim()).filter(Boolean) : []),
+    status: se.status ?? "",
+    observacao: se.observacao ?? se.note ?? ""
+  }));
+}
+
 function mapOsToLegacy(os) {
     if (!os) return null;
 
@@ -365,8 +377,8 @@ async function getOrdemPorId(id) {
             // Acesso Prestador via RPC Seguro (Sessão)
             console.log("[Services] Buscando OS via Provider Session RPC:", id);
             const { data, error } = await supabaseClient.rpc('get_work_order_for_provider_session', {
-                p_work_order_id: id,
-                p_session_token: providerToken
+                p_session_token: providerToken,
+                p_work_order_id: id
             });
 
             if (error) throw error;
@@ -398,7 +410,7 @@ async function getOrdemPorId(id) {
                 dataFinalizado: wo.finished_at,
                 realizado: wo.realizado_text,
                 pendencias: wo.pendencias_text,
-                servicosExecutados: data.service_exec || []
+                servicosExecutados: mapServiceExecToRelatorio(data.service_exec)
             };
             return result;
 
@@ -476,7 +488,7 @@ async function getOrdemPorSlug(slug) {
             dataFinalizado: wo.finished_at,
             realizado: wo.realizado_text,
             pendencias: wo.pendencias_text,
-            servicosExecutados: data.service_exec || []
+            servicosExecutados: mapServiceExecToRelatorio(data.service_exec)
         };
         return result;
 
@@ -512,8 +524,8 @@ async function atualizarStatusOrdem(ordemId, dados) {
         } else if (providerToken) {
              // Usar RPC para acesso Prestador (Session Token)
              const { error } = await supabaseClient.rpc('update_work_order_for_provider_session', {
-                p_work_order_id: ordemId,
                 p_session_token: providerToken,
+                p_work_order_id: ordemId,
                 p_status: dados.status || null,
                 p_started_at: dados.dataInicio || null,
                 p_finished_at: dados.dataFim || null,
@@ -597,12 +609,12 @@ async function salvarServicoIndividual(osId, servicoData) {
             return { success: true };
 
         } else if (providerToken) {
-            // RPC Provider Session
+            // RPC Provider Session (Correct Signature)
             const { error } = await supabaseClient.rpc('save_service_exec_for_provider_session', {
-                p_work_order_id: osId,
                 p_session_token: providerToken,
+                p_work_order_id: osId,
                 p_description: servicoData.descricao,
-                p_technicians: Array.isArray(servicoData.tecnicos) ? servicoData.tecnicos.join(', ') : servicoData.tecnicos,
+                p_technicians: Array.isArray(servicoData.tecnicos) ? servicoData.tecnicos.join(', ') : (servicoData.tecnicos || ""),
                 p_status: servicoData.status,
                 p_note: servicoData.observacao || "",
                 p_service_exec_id: servicoData.id || null

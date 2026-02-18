@@ -464,7 +464,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             return;
           }
           
+          // Verificar se já existe um serviço salvo para incluir o ID (update)
+          const existente = (dadosOrdemAtual.servicosExecutados || [])
+            .find(s => (s.descricao || "").trim() === descricaoServico.trim());
+
           const servicoData = {
+            id: existente?.id ?? null,
             descricao: descricaoServico,
             tecnicos: tecnicosSelecionados,
             status: statusSelecionado,

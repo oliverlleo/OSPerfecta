@@ -22,12 +22,11 @@ ALTER TABLE public.provider_sessions ENABLE ROW LEVEL SECURITY;
 
 
 -- 3. Function: Provider Login (Creates Session)
--- Parameter names match exactly what is sent from JS: p_login, p_pin
 CREATE OR REPLACE FUNCTION public.provider_login(p_login text, p_pin text)
 RETURNS json
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_provider public.providers%rowtype;
@@ -47,7 +46,8 @@ BEGIN
 
     -- Generate random token (32 bytes hex)
     v_token := encode(gen_random_bytes(32), 'hex');
-    v_hash := encode(digest(v_token, 'sha256'), 'hex');
+    -- FIX: Use convert_to for bytea compatibility with digest
+    v_hash := encode(digest(convert_to(v_token, 'utf8'), 'sha256'), 'hex');
     v_expires := now() + interval '12 hours';
 
     INSERT INTO public.provider_sessions(provider_id, token_hash, expires_at)
@@ -73,13 +73,14 @@ CREATE OR REPLACE FUNCTION public.provider_validate_session(p_token text)
 RETURNS json
 LANGUAGE sql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public, extensions
 AS $$
     SELECT CASE
         WHEN EXISTS (
             SELECT 1
             FROM public.provider_sessions s
-            WHERE s.token_hash = encode(digest(p_token, 'sha256'), 'hex')
+            -- FIX: Use convert_to for bytea compatibility
+            WHERE s.token_hash = encode(digest(convert_to(p_token, 'utf8'), 'sha256'), 'hex')
               AND s.revoked = false
               AND s.expires_at > now()
         )
@@ -98,11 +99,12 @@ CREATE OR REPLACE FUNCTION public.provider_id_from_token(p_token text)
 RETURNS uuid
 LANGUAGE sql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public, extensions
 AS $$
     SELECT s.provider_id
     FROM public.provider_sessions s
-    WHERE s.token_hash = encode(digest(p_token, 'sha256'), 'hex')
+    -- FIX: Use convert_to for bytea compatibility
+    WHERE s.token_hash = encode(digest(convert_to(p_token, 'utf8'), 'sha256'), 'hex')
       AND s.revoked = false
       AND s.expires_at > now()
     LIMIT 1
@@ -111,13 +113,13 @@ $$;
 
 -- 6. RPC: Read Work Order for Provider (Session Based)
 CREATE OR REPLACE FUNCTION public.get_work_order_for_provider_session(
-    p_work_order_id uuid,
-    p_session_token text
+    p_session_token text,
+    p_work_order_id uuid
 )
 RETURNS json
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_provider_id uuid;
@@ -177,15 +179,15 @@ BEGIN
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION public.get_work_order_for_provider_session(uuid, text) TO anon;
-GRANT EXECUTE ON FUNCTION public.get_work_order_for_provider_session(uuid, text) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.get_work_order_for_provider_session(uuid, text) TO service_role;
+GRANT EXECUTE ON FUNCTION public.get_work_order_for_provider_session(text, uuid) TO anon;
+GRANT EXECUTE ON FUNCTION public.get_work_order_for_provider_session(text, uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_work_order_for_provider_session(text, uuid) TO service_role;
 
 
 -- 7. RPC: Update Work Order for Provider (Session Based)
 CREATE OR REPLACE FUNCTION public.update_work_order_for_provider_session(
-    p_work_order_id uuid,
     p_session_token text,
+    p_work_order_id uuid,
     p_status text DEFAULT NULL,
     p_started_at timestamptz DEFAULT NULL,
     p_finished_at timestamptz DEFAULT NULL,
@@ -195,7 +197,7 @@ CREATE OR REPLACE FUNCTION public.update_work_order_for_provider_session(
 RETURNS boolean
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_provider_id uuid;
@@ -231,15 +233,15 @@ BEGIN
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION public.update_work_order_for_provider_session(uuid, text, text, timestamptz, timestamptz, text, text) TO anon;
-GRANT EXECUTE ON FUNCTION public.update_work_order_for_provider_session(uuid, text, text, timestamptz, timestamptz, text, text) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.update_work_order_for_provider_session(uuid, text, text, timestamptz, timestamptz, text, text) TO service_role;
+GRANT EXECUTE ON FUNCTION public.update_work_order_for_provider_session(text, uuid, text, timestamptz, timestamptz, text, text) TO anon;
+GRANT EXECUTE ON FUNCTION public.update_work_order_for_provider_session(text, uuid, text, timestamptz, timestamptz, text, text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.update_work_order_for_provider_session(text, uuid, text, timestamptz, timestamptz, text, text) TO service_role;
 
 
 -- 8. RPC: Save Service Execution for Provider (Session Based)
 CREATE OR REPLACE FUNCTION public.save_service_exec_for_provider_session(
-    p_work_order_id uuid,
     p_session_token text,
+    p_work_order_id uuid,
     p_description text,
     p_technicians text,
     p_status text,
@@ -249,7 +251,7 @@ CREATE OR REPLACE FUNCTION public.save_service_exec_for_provider_session(
 RETURNS boolean
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_provider_id uuid;
@@ -292,22 +294,22 @@ BEGIN
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION public.save_service_exec_for_provider_session(uuid, text, text, text, text, text, uuid) TO anon;
-GRANT EXECUTE ON FUNCTION public.save_service_exec_for_provider_session(uuid, text, text, text, text, text, uuid) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.save_service_exec_for_provider_session(uuid, text, text, text, text, text, uuid) TO service_role;
+GRANT EXECUTE ON FUNCTION public.save_service_exec_for_provider_session(text, uuid, text, text, text, text, uuid) TO anon;
+GRANT EXECUTE ON FUNCTION public.save_service_exec_for_provider_session(text, uuid, text, text, text, text, uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.save_service_exec_for_provider_session(text, uuid, text, text, text, text, uuid) TO service_role;
 
 
 -- 9. RPC: Register File for Provider (Session Based)
 CREATE OR REPLACE FUNCTION public.register_file_for_provider_session(
-    p_work_order_id uuid,
     p_session_token text,
+    p_work_order_id uuid,
     p_file_name text,
     p_storage_path text
 )
 RETURNS boolean
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public, extensions
 AS $$
 DECLARE
     v_provider_id uuid;
@@ -336,9 +338,9 @@ BEGIN
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION public.register_file_for_provider_session(uuid, text, text, text) TO anon;
-GRANT EXECUTE ON FUNCTION public.register_file_for_provider_session(uuid, text, text, text) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.register_file_for_provider_session(uuid, text, text, text) TO service_role;
+GRANT EXECUTE ON FUNCTION public.register_file_for_provider_session(text, uuid, text, text) TO anon;
+GRANT EXECUTE ON FUNCTION public.register_file_for_provider_session(text, uuid, text, text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.register_file_for_provider_session(text, uuid, text, text) TO service_role;
 
 
 -- 10. Reload Schema Cache

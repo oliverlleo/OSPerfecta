@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastros - OS Perfecta</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Ajustes para convivência do Bootstrap com styles.css */
+        body { font-size: 1rem; }
+        header { margin-bottom: 2rem; }
+        .nav-tabs .nav-link { cursor: pointer; color: var(--secondary-color); }
+        .nav-tabs .nav-link.active { color: var(--primary-color); font-weight: bold; }
+        .table th { background-color: var(--light-gray); }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="img/logo.png" alt="Perfecta Logo" class="logo">
+            <h1>Sistema de Ordens de Serviço</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Chamado</a></li>
+                <li><a href="acompanhamento.html">Acompanhamento de Ordens</a></li>
+                <li><a href="programacao.html">Programação de Trabalho</a></li>
+                <li><a href="gerenciamento.html">Gerenciamento</a></li>
+                <li><a href="cadastros.html" class="active">Cadastros</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div id="mensagem-sistema" style="display:none; position: fixed; top: 20px; right: 20px; z-index: 9999; padding: 15px; border-radius: 5px;"></div>
+
+        <h2 class="mb-4 text-secondary">Gerenciamento de Cadastros</h2>
+
+        <ul class="nav nav-tabs mb-4" id="cadastroTabs" role="tablist">
+            <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" data-bs-target="#clientes">Clientes</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" data-bs-target="#locais">Locais</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" data-bs-target="#responsaveis">Responsáveis</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" data-bs-target="#tipos">Tipos de Serviço</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" data-bs-target="#prestadores">Prestadores</a></li>
+        </ul>
+
+        <div class="tab-content" id="cadastroTabsContent">
+            <!-- Clientes -->
+            <div class="tab-pane fade show active" id="clientes">
+                <div class="d-flex justify-content-between mb-3 flex-wrap gap-2">
+                    <input type="text" class="form-control w-auto" id="buscaCliente" placeholder="Buscar cliente..." onkeyup="carregarClientes()">
+                    <button class="btn btn-primary" onclick="abrirModalCliente()">Novo Cliente</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead><tr><th>Nome</th><th>Status</th><th>Ações</th></tr></thead>
+                        <tbody id="listaClientes"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Locais -->
+            <div class="tab-pane fade" id="locais">
+                <div class="d-flex justify-content-between mb-3 flex-wrap gap-2">
+                    <div class="d-flex gap-2">
+                        <input type="text" class="form-control w-auto" id="buscaLocal" placeholder="Buscar local..." onkeyup="carregarLocais()">
+                        <select id="filtroLocalCliente" class="form-select w-auto" onchange="carregarLocais()">
+                            <option value="">Todos os Clientes</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="abrirModalLocal()">Novo Local</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead><tr><th>Nome</th><th>Cliente</th><th>Endereço</th><th>Cidade</th><th>Status</th><th>Ações</th></tr></thead>
+                        <tbody id="listaLocais"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Responsáveis -->
+            <div class="tab-pane fade" id="responsaveis">
+                <div class="d-flex justify-content-between mb-3 flex-wrap gap-2">
+                    <input type="text" class="form-control w-auto" id="buscaResponsavel" placeholder="Buscar responsável..." onkeyup="carregarResponsaveis()">
+                    <button class="btn btn-primary" onclick="abrirModalResponsavel()">Novo Responsável</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead><tr><th>Nome</th><th>Status</th><th>Ações</th></tr></thead>
+                        <tbody id="listaResponsaveis"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tipos de Serviço -->
+            <div class="tab-pane fade" id="tipos">
+                <div class="d-flex justify-content-between mb-3 flex-wrap gap-2">
+                    <input type="text" class="form-control w-auto" id="buscaTipo" placeholder="Buscar tipo..." onkeyup="carregarTipos()">
+                    <button class="btn btn-primary" onclick="abrirModalTipo()">Novo Tipo</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead><tr><th>Nome</th><th>Status</th><th>Ações</th></tr></thead>
+                        <tbody id="listaTipos"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Prestadores -->
+            <div class="tab-pane fade" id="prestadores">
+                <div class="d-flex justify-content-between mb-3 flex-wrap gap-2">
+                    <input type="text" class="form-control w-auto" id="buscaPrestador" placeholder="Buscar prestador..." onkeyup="carregarPrestadores()">
+                    <button class="btn btn-primary" onclick="abrirModalPrestador()">Novo Prestador</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead><tr><th>Nome</th><th>Status</th><th>Ações</th></tr></thead>
+                        <tbody id="listaPrestadores"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Perfecta - Sistema de Ordens de Serviço</p>
+    </footer>
+
+    <!-- Modals -->
+    <!-- Modal Cliente -->
+    <div class="modal fade" id="modalCliente" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title" id="modalClienteTitulo">Novo Cliente</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <input type="hidden" id="clienteId">
+                    <div class="mb-3">
+                        <label class="form-label">Nome *</label>
+                        <input type="text" id="clienteNome" class="form-control" required>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="clienteAtivo" checked>
+                        <label class="form-check-label">Ativo</label>
+                    </div>
+
+                    <div id="secaoLocaisRapidos" class="mt-4 border-top pt-3">
+                        <h6>Adicionar Local Rápido (Opcional)</h6>
+                        <div class="row g-2">
+                            <div class="col-12"><input type="text" id="localRapidoNome" class="form-control form-control-sm" placeholder="Nome do Local (ex: Matriz)"></div>
+                            <div class="col-12"><input type="text" id="localRapidoEndereco" class="form-control form-control-sm" placeholder="Endereço"></div>
+                            <div class="col-12"><input type="text" id="localRapidoCidade" class="form-control form-control-sm" placeholder="Cidade"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="salvarCliente()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Local -->
+    <div class="modal fade" id="modalLocal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title" id="modalLocalTitulo">Novo Local</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <input type="hidden" id="localId">
+                    <div class="mb-3">
+                        <label class="form-label">Cliente *</label>
+                        <select id="localClienteId" class="form-select" required></select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nome do Local *</label>
+                        <input type="text" id="localNome" class="form-control" required placeholder="Ex: Matriz, Filial X">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Endereço *</label>
+                        <input type="text" id="localEndereco" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Cidade *</label>
+                        <input type="text" id="localCidade" class="form-control" required>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="localAtivo" checked>
+                        <label class="form-check-label">Ativo</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="salvarLocal()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Responsável -->
+    <div class="modal fade" id="modalResponsavel" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title" id="modalResponsavelTitulo">Responsável</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <input type="hidden" id="responsavelId">
+                    <div class="mb-3"><label>Nome *</label><input type="text" id="responsavelNome" class="form-control" required></div>
+                    <div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="responsavelAtivo" checked><label>Ativo</label></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="salvarResponsavel()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Tipo -->
+    <div class="modal fade" id="modalTipo" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title" id="modalTipoTitulo">Tipo de Serviço</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <input type="hidden" id="tipoId">
+                    <div class="mb-3"><label>Nome *</label><input type="text" id="tipoNome" class="form-control" required></div>
+                    <div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="tipoAtivo" checked><label>Ativo</label></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="salvarTipo()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Prestador -->
+    <div class="modal fade" id="modalPrestador" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title" id="modalPrestadorTitulo">Prestador</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <input type="hidden" id="prestadorId">
+                    <div class="mb-3"><label>Nome *</label><input type="text" id="prestadorNome" class="form-control" required></div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label>Login (Acesso OS) *</label>
+                            <input type="text" id="prestadorLogin" class="form-control" required>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label>Senha (4 Dígitos) *</label>
+                            <input type="text" id="prestadorSenha" class="form-control" maxlength="4" required>
+                        </div>
+                    </div>
+                    <div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="prestadorAtivo" checked><label>Ativo</label></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="salvarPrestador()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/auth_guard.js"></script>
+    <!-- Use o Services novo que será criado em breve para reutilizar funções se possível, ou usar direto no cadastros.js -->
+    <!-- <script src="js/services.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/cadastros.js"></script>
+</body>
+</html>
